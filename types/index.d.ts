@@ -8,3 +8,9 @@ export interface IError {
   errorCode: string;
   errorMsg: string;
 }
+
+export interface IResponse <T> {
+  status: number;
+  data?: T;
+  error?: IError;
+}

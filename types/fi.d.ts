@@ -31,5 +31,46 @@ export interface IKeys {
       KeyValue: string;
     };
   };
-  nounce: string;
+  nonce: string;
+}
+
+export interface IFIFetchRequest {
+  sessionId: string;
+  fipId?: string;
+  linkRefNumber?: Array<{
+    id: string;
+  }>;
+}
+
+export interface IFIFetchResponse {
+  ver: string;
+  timestamp: string;
+  txnid: string;
+  FI: Fi[];
+}
+
+interface Fi {
+  fipID: string;
+  data: FIData[];
+  KeyMaterial: KeyMaterial;
+}
+
+interface KeyMaterial {
+  cryptoAlg: string;
+  curve: string;
+  params: string;
+  DHPublicKey: DHPublicKey;
+  Nonce: string;
+}
+
+interface DHPublicKey {
+  expiry: string;
+  Parameters: string;
+  KeyValue: string;
+}
+
+interface FIData {
+  linkRefNumber: string;
+  maskedAccNumber: string;
+  encryptedFI: string;
 }
