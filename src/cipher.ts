@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 
-class Cipher {
+export class Cipher {
   private algorithm = "aes-256-gcm";
   private ivLength = 12;
   private saltIVOffset = 20;
@@ -80,5 +80,3 @@ class Cipher {
     return decrypted;
   }
 }
-
-export default Cipher;

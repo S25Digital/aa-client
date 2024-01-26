@@ -1,3 +1,5 @@
+import AAClient from "src/client";
+
 export * from "./consent";
 export * from "./fi";
 
@@ -9,8 +11,10 @@ export interface IError {
   errorMsg: string;
 }
 
-export interface IResponse <T> {
+export interface IResponse<T> {
   status: number;
   data?: T;
   error?: IError;
 }
+
+export function createAAClient(privateKey: JWK): AAClient;
