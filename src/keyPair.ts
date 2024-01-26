@@ -29,6 +29,6 @@ export function createKeyJson(): IKeys {
         KeyValue: publicKey.toString(),
       },
     },
-    nounce: v4()
+    nonce: v4()
   };
 }

@@ -1,18 +1,20 @@
 import { Axios } from "axios";
 import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
-import { v4 } from "uuid";
 
 import {
   IConsentByHandleResponse,
   IConsentByIdResponse,
   IConsentResponse,
   IConstentDetail,
-  IError,
+  IFIFetchRequest,
+  IFIFetchResponse,
   IFIRequest,
   IFIRequestResponse,
   IKeys,
+  IResponse,
 } from "../types";
 import { createKeyJson } from "./keyPair";
+import { baseMapper } from "./mapper";
 
 interface IOptions {
   privateKey: JWK;
@@ -22,7 +24,6 @@ interface IOptions {
 class AAClient {
   private _pvtKey: JWK;
   private _httpClient: Axios;
-  private _version: string = "2.0.0";
 
   constructor(opts: IOptions) {
     this._pvtKey = opts.privateKey;
@@ -41,11 +42,7 @@ class AAClient {
     url: string,
     payload: Record<string, any>,
     headers: Record<string, any> = {},
-  ): Promise<{
-    status: number;
-    data?: T;
-    error?: IError;
-  }> {
+  ): Promise<IResponse<T>> {
     try {
       const res = await this._httpClient.request({
         url,
@@ -118,9 +115,7 @@ class AAClient {
   ) {
     const payload = {
       ConsentDetail: consentDetail,
-      ver: this._version,
-      timestamp: new Date().toISOString(),
-      txnid: v4(),
+      ...baseMapper.execute({})
     };
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent`;
@@ -133,9 +128,7 @@ class AAClient {
     handle: string,
   ) {
     const payload = {
-      ver: this._version,
-      timestamp: new Date().toISOString(),
-      txnid: v4(),
+      ...baseMapper.execute({}),
       ConsentHandle: handle,
     };
     const headers = this._generateHeader(token, payload);
@@ -150,9 +143,7 @@ class AAClient {
 
   public async getConsentById(baseUrl: string, token: string, id: string) {
     const payload = {
-      ver: this._version,
-      timestamp: new Date().toISOString(),
-      txnid: v4(),
+      ...baseMapper.execute({}),
       consentId: id,
     };
     const headers = this._generateHeader(token, payload);
@@ -167,20 +158,14 @@ class AAClient {
     body: IFIRequest,
   ): Promise<{
     keys: IKeys;
-    response: {
-      status: number;
-      data?: IFIRequestResponse;
-      error?: IError;
-    };
+    response: IResponse<IFIRequestResponse>;
   }> {
     const keys = createKeyJson();
     const payload = {
-      ver: this._version,
-      timestamp: new Date().toISOString(),
-      txnid: v4(),
+      ...baseMapper.execute({}),
       ...body,
       KeyMaterial: keys.keyMaterial,
-      Nounce: keys.nounce,
+      Nonce: keys.nonce,
     };
 
     const headers = this._generateHeader(token, payload);
@@ -197,12 +182,39 @@ class AAClient {
   public async fetchFI(
     baseUrl: string,
     token: string,
-    payload: Record<string, any>,
+    body: IFIFetchRequest,
     keys: IKeys,
-  ) {
-    // fetch infromation
-    // decrypt information
-    // convert to json
+  ): Promise<{
+    response: IResponse<IFIFetchResponse>;
+    xmlData?: string;
+    jsonData?: Record<string, any>;
+  }> {
+    const payload = {
+      ...baseMapper.execute({}),
+      ...body,
+    };
+    const headers = this._generateHeader(token, payload);
+    const url = `${baseUrl}/FI/fetch`;
+
+    const response = await this._postRequest<IFIFetchResponse>(
+      url,
+      payload,
+      headers,
+    );
+
+    if (!response.data) {
+      return {
+        response,
+      };
+    }
+
+    // loop and decrypt data
+    // parse xml to json
+    // return response
+
+    return {
+      response,
+    };
   }
 }
 
