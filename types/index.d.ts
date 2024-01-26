@@ -1,4 +1,5 @@
 export * from "./consent";
+export * from "./fi";
 
 export interface IError {
   ver: "2.0.0";

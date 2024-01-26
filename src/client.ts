@@ -8,16 +8,15 @@ import {
   IConsentResponse,
   IConstentDetail,
   IError,
+  IFIRequest,
+  IFIRequestResponse,
+  IKeys,
 } from "../types";
+import { createKeyJson } from "./keyPair";
 
 interface IOptions {
   privateKey: JWK;
   httpClient: Axios;
-}
-
-interface IKey {
-  private: Record<string, any>;
-  public: Record<string, any>;
 }
 
 class AAClient {
@@ -66,8 +65,6 @@ class AAClient {
       });
     }
   }
-
-  private async _decryptFI(payload: string, key: IKey) {}
 
   public async generateDetachedJWS(
     payload: Record<string, any>,
@@ -167,17 +164,41 @@ class AAClient {
   public async raiseFIRequest(
     baseUrl: string,
     token: string,
-    payload: Record<string, any>,
-  ) {
-    // generate key andattach to payload
-    // return response and key
+    body: IFIRequest,
+  ): Promise<{
+    keys: IKeys;
+    response: {
+      status: number;
+      data?: IFIRequestResponse;
+      error?: IError;
+    };
+  }> {
+    const keys = createKeyJson();
+    const payload = {
+      ver: this._version,
+      timestamp: new Date().toISOString(),
+      txnid: v4(),
+      ...body,
+      KeyMaterial: keys.keyMaterial,
+      Nounce: keys.nounce,
+    };
+
+    const headers = this._generateHeader(token, payload);
+    const url = `${baseUrl}/FI/request`;
+
+    const response = await this._postRequest<IFIRequestResponse>(
+      url,
+      payload,
+      headers,
+    );
+    return { response, keys };
   }
 
   public async fetchFI(
     baseUrl: string,
     token: string,
     payload: Record<string, any>,
-    key: IKey,
+    keys: IKeys,
   ) {
     // fetch infromation
     // decrypt information
