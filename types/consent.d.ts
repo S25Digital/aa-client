@@ -68,8 +68,8 @@ interface Frequency {
 }
 
 interface FIDataRange {
-  from: Date;
-  to: Date;
+  from: string;
+  to: string;
 }
 
 interface Purpose {
@@ -99,4 +99,35 @@ export interface IConsentResponse {
     id: string;
   };
   ConsentHandle: string;
+}
+
+export interface IConsentByHandleResponse {
+  ver: string;
+  timestamp: string;
+  txnid: string;
+  ConsentHandle: string;
+  ConsentStatus: {
+    id: string;
+    status:
+      | "APPROVED"
+      | "EXPIRED"
+      | "REJECTED"
+      | "READY"
+      | "FAILED"
+      | "PENDING";
+  };
+}
+
+export interface IConsentByIdResponse {
+  ver: string;
+  txnid: string;
+  consentId: string;
+  status: "ACTIVE"| "PAUSED"| "REVOKED"| "EXPIRE";
+  createTimestamp: string;
+  signedConsent: string;
+  ConsentUse: {
+    logUri: string;
+    count: number;
+    lastUseDateTime: string;
+  };
 }

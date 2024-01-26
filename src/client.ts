@@ -2,7 +2,13 @@ import { Axios } from "axios";
 import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
 import { v4 } from "uuid";
 
-import { IConsentResponse, IConstentDetail, IError } from "../types";
+import {
+  IConsentByHandleResponse,
+  IConsentByIdResponse,
+  IConsentResponse,
+  IConstentDetail,
+  IError,
+} from "../types";
 
 interface IOptions {
   privateKey: JWK;
@@ -32,7 +38,7 @@ class AAClient {
     };
   }
 
-  private async _postRequest<T= Record<string, any>>(
+  private async _postRequest<T = Record<string, any>>(
     url: string,
     payload: Record<string, any>,
     headers: Record<string, any> = {},
@@ -138,7 +144,11 @@ class AAClient {
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent/handle`;
 
-    return await this._postRequest(url, payload, headers);
+    return await this._postRequest<IConsentByHandleResponse>(
+      url,
+      payload,
+      headers,
+    );
   }
 
   public async getConsentById(baseUrl: string, token: string, id: string) {
@@ -151,7 +161,7 @@ class AAClient {
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent/fetch`;
 
-    return await this._postRequest(url, payload, headers);
+    return await this._postRequest<IConsentByIdResponse>(url, payload, headers);
   }
 
   public async raiseFIRequest(
