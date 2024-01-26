@@ -1,5 +1,8 @@
 import { Axios } from "axios";
-import { FlattenedSign, JWK, KeyLike, flattenedVerify, importJWK } from "jose";
+import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
+import { v4 } from "uuid";
+
+import { IConstentDetail } from "../types";
 
 interface IOptions {
   privateKey: JWK;
@@ -14,14 +17,15 @@ interface IKey {
 class AAClient {
   private _pvtKey: JWK;
   private _httpClient: Axios;
+  private _version: string = "2.0.0";
 
   constructor(opts: IOptions) {
     this._pvtKey = opts.privateKey;
     this._httpClient = opts.httpClient;
   }
 
-  private async _generateHeader(token: string, body: Record<string, any>) {
-    const signature = await this.generateDetachedJWS(body);
+  private async _generateHeader(token: string, payload: Record<string, any>) {
+    const signature = await this.generateDetachedJWS(payload);
     return {
       client_api_key: token,
       "x-jws-signature": signature,
@@ -30,15 +34,15 @@ class AAClient {
 
   private async _postRequest(
     url: string,
-    body: Record<string, any>,
+    payload: Record<string, any>,
     headers: Record<string, any> = {},
   ) {
     try {
       const res = await this._httpClient.request({
-        url: `${url}/Consent`,
+        url,
         method: "POST",
         headers,
-        data: JSON.stringify(body),
+        data: JSON.stringify(payload),
       });
 
       return {
@@ -100,26 +104,71 @@ class AAClient {
     }
   }
 
-  public async raiseConsent(url: string, payload: Record<string, any>) {
-    // perform basic steps & send request
+  public async raiseConsent(
+    baseUrl: string,
+    token: string,
+    consentDetail: IConstentDetail,
+  ) {
+    const payload = {
+      ConsentDetail: consentDetail,
+      ver: this._version,
+      timestamp: new Date().toISOString(),
+      txnid: v4(),
+    };
+    const headers = this._generateHeader(token, payload);
+    const url = `${baseUrl}/Consent`;
+    return await this._postRequest(url, payload, headers);
   }
 
-  public async getConsentByHandle(url: string, handle: string) {
-    // perform basic steps & send request
+  public async getConsentByHandle(
+    baseUrl: string,
+    token: string,
+    handle: string,
+  ) {
+    const payload = {
+      ver: this._version,
+      timestamp: new Date().toISOString(),
+      txnid: v4(),
+      ConsentHandle: handle,
+    };
+    const headers = this._generateHeader(token, payload);
+    const url = `${baseUrl}/Consent/Handle`;
+
+    return await this._postRequest(url, payload, headers);
   }
 
-  public async getConsentById(url: string, id: string) {
-    // perform basic steps & send request
+  public async getConsentById(baseUrl: string, token: string, id: string) {
+    const payload = {
+      ver: this._version,
+      timestamp: new Date().toISOString(),
+      txnid: v4(),
+      consentId: id,
+    };
+    const headers = this._generateHeader(token, payload);
+    const url = `${baseUrl}/Consent/Handle`;
+
+    return await this._postRequest(url, payload, headers);
   }
 
-  public async raiseFIRequest(url: string, payload: Record<string, any>) {
+  public async raiseFIRequest(
+    baseUrl: string,
+    token: string,
+    payload: Record<string, any>,
+  ) {
     // generate key andattach to payload
     // return response and key
   }
 
-  public async fetchFI(url: string, payload: Record<string, any>, key: IKey) {
+  public async fetchFI(
+    baseUrl: string,
+    token: string,
+    payload: Record<string, any>,
+    key: IKey,
+  ) {
     // fetch infromation
     // decrypt information
     // convert to json
   }
 }
+
+export default AAClient;
