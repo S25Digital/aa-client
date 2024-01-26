@@ -1,5 +1,5 @@
 import { Axios } from "axios";
-import { JWK, KeyLike, importJWK } from "jose";
+import { FlattenedSign, JWK, KeyLike, flattenedVerify, importJWK } from "jose";
 
 interface IOptions {
   privateKey: JWK;
@@ -12,35 +12,92 @@ interface IKey {
 }
 
 class AAClient {
-  private _pvtKey: KeyLike | Uint8Array;
+  private _pvtKey: JWK;
   private _httpClient: Axios;
 
   constructor(opts: IOptions) {
-    // this._pvtKey = await importJWK(privateKey, "RS256") // import pvt key
+    this._pvtKey = opts.privateKey;
+    this._httpClient = opts.httpClient;
   }
 
-  private async _postRequest() {
-    //axios post request wrapper
+  private async _generateHeader(token: string, body: Record<string, any>) {
+    const signature = await this.generateDetachedJWS(body);
+    return {
+      client_api_key: token,
+      "x-jws-signature": signature,
+    };
   }
 
-  private async _decryptFI(payload: string, key: IKey) {
+  private async _postRequest(
+    url: string,
+    body: Record<string, any>,
+    headers: Record<string, any> = {},
+  ) {
+    try {
+      const res = await this._httpClient.request({
+        url: `${url}/Consent`,
+        method: "POST",
+        headers,
+        data: JSON.stringify(body),
+      });
 
+      return {
+        status: res.status,
+        data: res.data,
+      };
+    } catch (err) {
+      return Promise.reject({
+        status: err.response.status,
+        error: err.response.data,
+      });
+    }
   }
+
+  private async _decryptFI(payload: string, key: IKey) {}
 
   public async generateDetachedJWS(
     payload: Record<string, any>,
   ): Promise<string> {
-    // flattened sign and return detached payload
-    return "";
+    const key = await importJWK(this._pvtKey, "RS256");
+    const encodedPayload = new TextEncoder().encode(JSON.stringify(payload));
+    const data = await new FlattenedSign(encodedPayload)
+      .setProtectedHeader({
+        alg: "RS256",
+        b64: false,
+        crit: ["b64"],
+      })
+      .sign(key);
+    return `${data.protected}..${data.signature}`;
   }
 
   public async verifySignature(
     payload: Record<string, any>,
     signature: string,
-  ): Promise<{ isVerified: boolean }> {
-    // validate signature and return
-    const response = { isVerified: false };
-    return response;
+    publicKey: JWK,
+  ): Promise<{ isVerified: boolean; message?: string }> {
+    try {
+      const parts = signature.split(".");
+      if (parts.length !== 3) {
+        return { isVerified: false, message: "Invalid signature" };
+      }
+
+      const key = await importJWK(publicKey, "RS256");
+      const encodedPayload = new TextEncoder().encode(JSON.stringify(payload));
+      await flattenedVerify(
+        {
+          protected: parts[0],
+          signature: parts[2],
+          payload: encodedPayload,
+        },
+        key,
+      );
+      return { isVerified: true };
+    } catch (error) {
+      return Promise.resolve({
+        isVerified: false,
+        message: error?.message ?? "Invalid Signature",
+      });
+    }
   }
 
   public async raiseConsent(url: string, payload: Record<string, any>) {
