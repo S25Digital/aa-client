@@ -90,3 +90,13 @@ interface Category {
     | "Financial Reporting"
     | "Account Query and Monitoring";
 }
+
+export interface IConsentResponse {
+  ver: string;
+  timestamp: string;
+  txnid: string;
+  Customer: {
+    id: string;
+  };
+  ConsentHandle: string;
+}

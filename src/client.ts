@@ -2,7 +2,7 @@ import { Axios } from "axios";
 import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
 import { v4 } from "uuid";
 
-import { IConstentDetail } from "../types";
+import { IConsentResponse, IConstentDetail, IError } from "../types";
 
 interface IOptions {
   privateKey: JWK;
@@ -32,11 +32,15 @@ class AAClient {
     };
   }
 
-  private async _postRequest(
+  private async _postRequest<T= Record<string, any>>(
     url: string,
     payload: Record<string, any>,
     headers: Record<string, any> = {},
-  ) {
+  ): Promise<{
+    status: number;
+    data?: T;
+    error?: IError;
+  }> {
     try {
       const res = await this._httpClient.request({
         url,
@@ -117,7 +121,7 @@ class AAClient {
     };
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent`;
-    return await this._postRequest(url, payload, headers);
+    return await this._postRequest<IConsentResponse>(url, payload, headers);
   }
 
   public async getConsentByHandle(
@@ -132,7 +136,7 @@ class AAClient {
       ConsentHandle: handle,
     };
     const headers = this._generateHeader(token, payload);
-    const url = `${baseUrl}/Consent/Handle`;
+    const url = `${baseUrl}/Consent/handle`;
 
     return await this._postRequest(url, payload, headers);
   }
@@ -145,7 +149,7 @@ class AAClient {
       consentId: id,
     };
     const headers = this._generateHeader(token, payload);
-    const url = `${baseUrl}/Consent/Handle`;
+    const url = `${baseUrl}/Consent/fetch`;
 
     return await this._postRequest(url, payload, headers);
   }
