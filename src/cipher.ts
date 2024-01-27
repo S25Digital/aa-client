@@ -1,5 +1,4 @@
-import * as crypto from "crypto";
-
+import crypto from "crypto";
 export class Cipher {
   private algorithm = "aes-256-gcm";
   private ivLength = 12;
@@ -73,9 +72,8 @@ export class Cipher {
       this.saltIVOffset,
       this.saltIVOffset + this.ivLength,
     );
-    const [encryptedData, authTag] = base64EncodedData.split(":");
     const decipher = crypto.createDecipheriv(this.algorithm, sessionKey, iv);
-    let decrypted = decipher.update(encryptedData, "base64", "utf8");
+    let decrypted = decipher.update(base64EncodedData, "base64", "utf8");
     decrypted += decipher.final("utf8");
     return decrypted;
   }

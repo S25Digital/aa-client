@@ -1,5 +1,6 @@
 import { Axios } from "axios";
 import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
+import { XMLParser } from "fast-xml-parser";
 
 import {
   IConsentByHandleResponse,
@@ -15,6 +16,7 @@ import {
 } from "../types";
 import { createKeyJson } from "./keyPair";
 import { baseMapper } from "./mapper";
+import { Cipher } from "./cipher";
 
 interface IOptions {
   privateKey: JWK;
@@ -24,10 +26,12 @@ interface IOptions {
 class AAClient {
   private _pvtKey: JWK;
   private _httpClient: Axios;
+  private _parser: XMLParser;
 
   constructor(opts: IOptions) {
     this._pvtKey = opts.privateKey;
     this._httpClient = opts.httpClient;
+    this._parser = new XMLParser();
   }
 
   private async _generateHeader(token: string, payload: Record<string, any>) {
@@ -115,7 +119,7 @@ class AAClient {
   ) {
     const payload = {
       ConsentDetail: consentDetail,
-      ...baseMapper.execute({})
+      ...baseMapper.execute({}),
     };
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent`;
@@ -186,8 +190,7 @@ class AAClient {
     keys: IKeys,
   ): Promise<{
     response: IResponse<IFIFetchResponse>;
-    xmlData?: string;
-    jsonData?: Record<string, any>;
+    FIData?: Array<Record<string, any>>
   }> {
     const payload = {
       ...baseMapper.execute({}),
@@ -208,12 +211,37 @@ class AAClient {
       };
     }
 
-    // loop and decrypt data
-    // parse xml to json
-    // return response
+    const FI = response.data.FI;
+
+    const FIData: Array<Record<string,any>> = [];
+
+    FI.forEach((item) => {
+      item.data.forEach(async (data) => {
+        const cipher = new Cipher(
+          keys.privateKey,
+          item.KeyMaterial.DHPublicKey.KeyValue,
+        );
+
+        const xmlData = await cipher.decrypt(
+          keys.nonce,
+          item.KeyMaterial.Nonce,
+          data.encryptedFI,
+        );
+
+        const jsonData = this._parser.parse(xmlData);
+
+        FIData.push({
+          fip: item.fipID,
+          ...data,
+          xmlData,
+          jsonData,
+        });
+      });
+    });
 
     return {
       response,
+      FIData
     };
   }
 }
