@@ -1,10 +1,11 @@
-import crypto from "crypto";
+import crypto, { CipherGCMTypes } from "crypto";
 export class Cipher {
-  private algorithm = "aes-256-gcm";
+  private algorithm: CipherGCMTypes = "aes-256-gcm";
   private ivLength = 12;
   private saltIVOffset = 20;
   private _privateKey: string;
   private _publicKey: string;
+  private _gcmTagLength = 16;
 
   constructor(privateKey: string, publicKey: string) {
     this._privateKey = privateKey;
@@ -20,7 +21,7 @@ export class Cipher {
 
   // Method to generate a session key
   private _getSessionKey(sharedSecret: Buffer, xoredNonce: Buffer): Buffer {
-    const salt = xoredNonce.subarray(0, 20);
+    const salt = xoredNonce.slice(0, 20);
     return crypto.createHmac("sha256", salt).update(sharedSecret).digest();
   }
 
@@ -46,14 +47,17 @@ export class Cipher {
       Buffer.from(remoteNonce, "base64"),
     );
     const sessionKey = this._getSessionKey(sharedSecret, xoredNonce);
-    const iv = xoredNonce.subarray(
+    const iv = xoredNonce.slice(
       this.saltIVOffset,
       this.saltIVOffset + this.ivLength,
     );
-    const cipher = crypto.createCipheriv(this.algorithm, sessionKey, iv);
-    let encrypted = cipher.update(data, "utf8", "base64");
-    encrypted += cipher.final("base64");
-    return `${encrypted}`;
+    const cipher = crypto.createCipheriv(this.algorithm, sessionKey, iv, {
+      authTagLength: this._gcmTagLength,
+    });
+    let encrypted = cipher.update(data, "utf8");
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    const authTag = cipher.getAuthTag();
+    return `${encrypted.toString("base64")}:${authTag.toString("base64")}`;
   }
 
   // Method to decrypt data
@@ -68,12 +72,16 @@ export class Cipher {
       Buffer.from(remoteNonce, "base64"),
     );
     const sessionKey = this._getSessionKey(sharedSecret, xoredNonce);
-    const iv = xoredNonce.subarray(
+    const iv = xoredNonce.slice(
       this.saltIVOffset,
       this.saltIVOffset + this.ivLength,
     );
-    const decipher = crypto.createDecipheriv(this.algorithm, sessionKey, iv);
-    let decrypted = decipher.update(base64EncodedData, "base64", "utf8");
+    const [encryptedData, authTag] = base64EncodedData.split(":");
+    const decipher = crypto.createDecipheriv(this.algorithm, sessionKey, iv, {
+      authTagLength: this._gcmTagLength,
+    });
+    decipher.setAuthTag(Buffer.from(authTag, "base64"));
+    let decrypted = decipher.update(encryptedData, "base64", "utf8");
     decrypted += decipher.final("utf8");
     return decrypted;
   }

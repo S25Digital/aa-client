@@ -11,7 +11,6 @@ export function createKeyJson(): FITypes.IKeys {
     privateKeyEncoding: {
       type: "pkcs8",
       format: "pem",
-      cipher: "aes-256-cbc",
     },
   });
 
