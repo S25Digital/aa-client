@@ -3,15 +3,8 @@ import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
 import { XMLParser } from "fast-xml-parser";
 
 import {
-  IConsentByHandleResponse,
-  IConsentByIdResponse,
-  IConsentResponse,
-  IConstentDetail,
-  IFIFetchRequest,
-  IFIFetchResponse,
-  IFIRequest,
-  IFIRequestResponse,
-  IKeys,
+  ConsentTypes,
+  FITypes,
   IResponse,
 } from "../types";
 import { createKeyJson } from "./keyPair";
@@ -115,7 +108,7 @@ class AAClient {
   public async raiseConsent(
     baseUrl: string,
     token: string,
-    consentDetail: IConstentDetail,
+    consentDetail: ConsentTypes.IConstentDetail,
   ) {
     const payload = {
       ConsentDetail: consentDetail,
@@ -123,7 +116,7 @@ class AAClient {
     };
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent`;
-    return await this._postRequest<IConsentResponse>(url, payload, headers);
+    return await this._postRequest<ConsentTypes.IConsentResponse>(url, payload, headers);
   }
 
   public async getConsentByHandle(
@@ -138,7 +131,7 @@ class AAClient {
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent/handle`;
 
-    return await this._postRequest<IConsentByHandleResponse>(
+    return await this._postRequest<ConsentTypes.IConsentByHandleResponse>(
       url,
       payload,
       headers,
@@ -153,16 +146,16 @@ class AAClient {
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent/fetch`;
 
-    return await this._postRequest<IConsentByIdResponse>(url, payload, headers);
+    return await this._postRequest<ConsentTypes.IConsentByIdResponse>(url, payload, headers);
   }
 
   public async raiseFIRequest(
     baseUrl: string,
     token: string,
-    body: IFIRequest,
+    body: FITypes.IFIRequest,
   ): Promise<{
-    keys: IKeys;
-    response: IResponse<IFIRequestResponse>;
+    keys: FITypes.IKeys;
+    response: IResponse<FITypes.IFIRequestResponse>;
   }> {
     const keys = createKeyJson();
     const payload = {
@@ -175,7 +168,7 @@ class AAClient {
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/FI/request`;
 
-    const response = await this._postRequest<IFIRequestResponse>(
+    const response = await this._postRequest<FITypes.IFIRequestResponse>(
       url,
       payload,
       headers,
@@ -186,10 +179,10 @@ class AAClient {
   public async fetchFI(
     baseUrl: string,
     token: string,
-    body: IFIFetchRequest,
-    keys: IKeys,
+    body: FITypes.IFIFetchRequest,
+    keys: FITypes.IKeys,
   ): Promise<{
-    response: IResponse<IFIFetchResponse>;
+    response: IResponse<FITypes.IFIFetchResponse>;
     FIData?: Array<Record<string, any>>
   }> {
     const payload = {
@@ -199,7 +192,7 @@ class AAClient {
     const headers = this._generateHeader(token, payload);
     const url = `${baseUrl}/FI/fetch`;
 
-    const response = await this._postRequest<IFIFetchResponse>(
+    const response = await this._postRequest<FITypes.IFIFetchResponse>(
       url,
       payload,
       headers,

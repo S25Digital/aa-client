@@ -1,20 +1,6 @@
-import AAClient from "src/client";
-
-export * from "./consent";
-export * from "./fi";
-
-export interface IError {
-  ver: "2.0.0";
-  txnid: string;
-  timestamp: string;
-  errorCode: string;
-  errorMsg: string;
-}
-
-export interface IResponse<T> {
-  status: number;
-  data?: T;
-  error?: IError;
-}
+export * as ConsentTypes from "./consent";
+export * as FITypes from "./fi";
+export * from "./common";
+export * from 
 
 export function createAAClient(privateKey: JWK): AAClient;

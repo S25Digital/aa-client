@@ -1,8 +1,8 @@
 import { generateKeyPairSync } from "crypto";
-import { IKeys } from "types";
+import { FITypes } from "../types";
 import { v4 } from "uuid";
 
-export function createKeyJson(): IKeys {
+export function createKeyJson(): FITypes.IKeys {
   const { privateKey, publicKey } = generateKeyPairSync("x25519", {
     publicKeyEncoding: {
       type: "spki",
