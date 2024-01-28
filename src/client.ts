@@ -114,7 +114,7 @@ class AAClient {
       ConsentDetail: consentDetail,
       ...baseMapper.execute({}),
     };
-    const headers = this._generateHeader(token, payload);
+    const headers = await this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent`;
     return await this._postRequest<ConsentTypes.IConsentResponse>(url, payload, headers);
   }
@@ -128,7 +128,7 @@ class AAClient {
       ...baseMapper.execute({}),
       ConsentHandle: handle,
     };
-    const headers = this._generateHeader(token, payload);
+    const headers = await this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent/handle`;
 
     return await this._postRequest<ConsentTypes.IConsentByHandleResponse>(
@@ -143,7 +143,7 @@ class AAClient {
       ...baseMapper.execute({}),
       consentId: id,
     };
-    const headers = this._generateHeader(token, payload);
+    const headers = await this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent/fetch`;
 
     return await this._postRequest<ConsentTypes.IConsentByIdResponse>(url, payload, headers);
@@ -165,7 +165,7 @@ class AAClient {
       Nonce: keys.nonce,
     };
 
-    const headers = this._generateHeader(token, payload);
+    const headers = await this._generateHeader(token, payload);
     const url = `${baseUrl}/FI/request`;
 
     const response = await this._postRequest<FITypes.IFIRequestResponse>(
@@ -189,7 +189,7 @@ class AAClient {
       ...baseMapper.execute({}),
       ...body,
     };
-    const headers = this._generateHeader(token, payload);
+    const headers = await this._generateHeader(token, payload);
     const url = `${baseUrl}/FI/fetch`;
 
     const response = await this._postRequest<FITypes.IFIFetchResponse>(
