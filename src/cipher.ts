@@ -21,7 +21,7 @@ export class Cipher {
 
   // Method to generate a session key
   private _getSessionKey(sharedSecret: Buffer, xoredNonce: Buffer): Buffer {
-    const salt = xoredNonce.slice(0, 20);
+    const salt = xoredNonce.subarray(0, 20);
     return crypto.createHmac("sha256", salt).update(sharedSecret).digest();
   }
 
@@ -47,7 +47,7 @@ export class Cipher {
       Buffer.from(remoteNonce, "base64"),
     );
     const sessionKey = this._getSessionKey(sharedSecret, xoredNonce);
-    const iv = xoredNonce.slice(
+    const iv = xoredNonce.subarray(
       this.saltIVOffset,
       this.saltIVOffset + this.ivLength,
     );
@@ -72,7 +72,7 @@ export class Cipher {
       Buffer.from(remoteNonce, "base64"),
     );
     const sessionKey = this._getSessionKey(sharedSecret, xoredNonce);
-    const iv = xoredNonce.slice(
+    const iv = xoredNonce.subarray(
       this.saltIVOffset,
       this.saltIVOffset + this.ivLength,
     );
