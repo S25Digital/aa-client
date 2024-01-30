@@ -2,11 +2,7 @@ import { Axios } from "axios";
 import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
 import { XMLParser } from "fast-xml-parser";
 
-import {
-  ConsentTypes,
-  FITypes,
-  IResponse,
-} from "../types";
+import { ConsentTypes, FITypes, IResponse } from "../types";
 import { createKeyJson } from "./keyPair";
 import { baseMapper } from "./mapper";
 import { Cipher } from "./cipher";
@@ -32,6 +28,7 @@ class AAClient {
     return {
       client_api_key: token,
       "x-jws-signature": signature,
+      "Content-Type": "application/json"
     };
   }
 
@@ -53,7 +50,7 @@ class AAClient {
         data: res.data,
       };
     } catch (err) {
-      return Promise.reject({
+      return Promise.resolve({
         status: err.response.status,
         error: err.response.data,
       });
@@ -116,7 +113,11 @@ class AAClient {
     };
     const headers = await this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent`;
-    return await this._postRequest<ConsentTypes.IConsentResponse>(url, payload, headers);
+    return await this._postRequest<ConsentTypes.IConsentResponse>(
+      url,
+      payload,
+      headers,
+    );
   }
 
   public async getConsentByHandle(
@@ -146,7 +147,11 @@ class AAClient {
     const headers = await this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent/fetch`;
 
-    return await this._postRequest<ConsentTypes.IConsentByIdResponse>(url, payload, headers);
+    return await this._postRequest<ConsentTypes.IConsentByIdResponse>(
+      url,
+      payload,
+      headers,
+    );
   }
 
   public async raiseFIRequest(
@@ -183,7 +188,7 @@ class AAClient {
     keys: FITypes.IKeys,
   ): Promise<{
     response: IResponse<FITypes.IFIFetchResponse>;
-    FIData?: Array<Record<string, any>>
+    FIData?: Array<Record<string, any>>;
   }> {
     const payload = {
       ...baseMapper.execute({}),
@@ -206,7 +211,7 @@ class AAClient {
 
     const FI = response.data.FI;
 
-    const FIData: Array<Record<string,any>> = [];
+    const FIData: Array<Record<string, any>> = [];
 
     FI.forEach((item) => {
       item.data.forEach(async (data) => {
@@ -234,7 +239,7 @@ class AAClient {
 
     return {
       response,
-      FIData
+      FIData,
     };
   }
 }

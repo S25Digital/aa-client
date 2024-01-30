@@ -1,3 +1,6 @@
+import nock from "nock";
+import { IConstentDetail } from "../types/consent";
+
 export const keyPair = {
   p: "xfwDuWwaJFi1PgXh7_9U3eyEbNysqo1fL3wfUsCMU3-zLWob-xrwRAjDRqnc32bs8Cwzzn7iIPLS2Bru_B6SgD6zB3syF3PCUdfmGUINLOcS2pQBmOU-iLCOWIfuL0Nvcx2Ot3nQ5zD9yrabiv18-6ShcbmhbSQfAMEKlqQFopk",
   kty: "RSA",
@@ -19,3 +22,84 @@ export const publicKey = {
   alg: "RS256",
   n: "jeesD6g-LxbC2dco_ZC3snVJDyXHUM3EJ-CALeIlN2_02M0WiSupFv_zqRROJCUCu-LWFyhkJAWzLvAoY4OnT8ouGe939wnTovIp2cdCUZcqZluItjrwzpCvdXLhAp7EIeShKHJiD40j3zHHp9iktkjOuOyg3bX9dQCK3Bsd6qtWCwK_lt7S2pVWtkxUTz_N9T64ApDkbgUGrftCEsYJKXWqARkFD72aLZV3lWXfucEnWkZZ6nOJyoLB-slUsvbm3tG3hMIaWvvcuOilauAVRqchyDA4sgASbaW-UZGqDudJxpy0rqw5MFuW_Kd92k_7exBJ160v4utyC3070XtOaQ",
 };
+
+export const baseUrl = "https://localhost:3000/v2";
+export const consentDetail: IConstentDetail = {
+  consentStart: "2019-12-06T11:39:57.153Z",
+  consentExpiry: "2019-12-06T11:39:57.153Z",
+  consentMode: "VIEW",
+  fetchType: "ONETIME",
+  consentTypes: ["PROFILE"],
+  fiTypes: ["DEPOSIT"],
+  DataConsumer: {
+    id: "DC1",
+    type: "FIU",
+  },
+  Customer: {
+    id: "9999999999@AA_identifier",
+    Identifiers: [
+      {
+        type: "MOBILE",
+        value: "9999999999",
+      },
+    ],
+  },
+  Purpose: {
+    code: "101",
+    refUri: "https://api.rebit.org.in/aa/purpose/101.xml",
+    text: "Wealth management service",
+  },
+  FIDataRange: {
+    from: "2023-07-06T11:39:57.153Z",
+    to: "2019-12-06T11:39:57.153Z",
+  },
+  DataLife: {
+    unit: "MONTH",
+    value: 0,
+  },
+  Frequency: {
+    unit: "HOUR",
+    value: 1,
+  },
+  DataFilter: [
+    {
+      type: "TRANSACTIONAMOUNT",
+      operator: ">=",
+      value: "20000",
+    },
+  ],
+};
+
+export const uuid = "d5e26bff-3887-46a2-8ed2-962adeede7e4";
+
+export function setupNock() {
+  return nock(baseUrl)
+    .post("/Consent", {
+      ConsentDetail: consentDetail,
+      ver: "2.0.0",
+      timestamp: "2023-06-26T11:39:57.153Z",
+      txnid: uuid,
+    } as any)
+    .reply(200, {
+      ver: "2.0.0",
+      timestamp: "2023-06-26T11:39:57.153Z",
+      txnid: uuid,
+      Customer: {
+        id: "9999999999@AA_identifier",
+      },
+      ConsentHandle: "39e108fe-9243-11e8-b9f2-0256d88baae8",
+    })
+    .post("/Consent", {
+      ConsentDetail: Object.assign({}, consentDetail, { consentMode: "STORE" }),
+      ver: "2.0.0",
+      timestamp: "2023-06-26T11:39:57.153Z",
+      txnid: uuid,
+    } as any)
+    .reply(400, {
+      ver: "2.0.0",
+      txnid: "0b811819-9044-4856-b0ee-8c88035f8858",
+      timestamp: "2023-06-26T11:33:34.509Z",
+      errorCode: "InvalidRequest",
+      errorMsg: "Error code specific error message",
+    });
+}

@@ -1,15 +1,44 @@
 import { expect } from "chai";
+import { SinonFakeTimers, useFakeTimers, stub } from "sinon";
+import proxyquire from "proxyquire";
 
-import { createAAClient } from "../src";
-import { keyPair, publicKey } from "./data";
+const { baseMapper } = proxyquire("../src/mapper.ts", {
+  uuid: {
+    v4: stub().returns(uuid),
+  },
+});
+const AAClient = proxyquire("../src/client.ts", {
+  "./mapper": { baseMapper },
+}).default;
+import {
+  baseUrl,
+  consentDetail,
+  keyPair,
+  publicKey,
+  setupNock,
+  uuid,
+} from "./data";
+import { Scope } from "nock";
+import axios from "axios";
 
-const aaClient = createAAClient(keyPair);
+const aaClient = new AAClient({
+  privateKey: keyPair,
+  httpClient: axios,
+});
 
 const body = {
   foo: "bar",
 };
+let clock: SinonFakeTimers;
+let nockServer: Scope;
 
 describe("AA Client", () => {
+  before(() => {
+    clock = useFakeTimers(new Date("2023-06-26T11:39:57.153Z"));
+  });
+  after(() => {
+    clock.restore();
+  });
   describe("The generateDetachedJWS method", () => {
     it("should return a detached signature", async () => {
       const signature = await aaClient.generateDetachedJWS(body);
@@ -42,6 +71,57 @@ describe("AA Client", () => {
         expect(res).to.deep.equal({
           isVerified: false,
           message: "signature verification failed",
+        });
+      });
+    });
+  });
+
+  describe("The raiseConsent method", () => {
+    beforeEach(() => {
+      nockServer = setupNock();
+    });
+    afterEach(() => {
+      nockServer.removeAllListeners();
+    });
+    describe("when it is successful", () => {
+      it("should return the appropriate response", async () => {
+        const res = await aaClient.raiseConsent(
+          baseUrl,
+          "token",
+          consentDetail,
+        );
+
+        expect(res).to.deep.equal({
+          data: {
+            ConsentHandle: "39e108fe-9243-11e8-b9f2-0256d88baae8",
+            Customer: {
+              id: "9999999999@AA_identifier",
+            },
+            timestamp: "2023-06-26T11:39:57.153Z",
+            txnid: "d5e26bff-3887-46a2-8ed2-962adeede7e4",
+            ver: "2.0.0",
+          },
+          status: 200,
+        });
+      });
+    });
+    describe("when there is an error", () => {
+      it("should return the appropriate response", async () => {
+        const res = await aaClient.raiseConsent(
+          baseUrl,
+          "token",
+          Object.assign({}, consentDetail, { consentMode: "STORE" }),
+        );
+
+        expect(res).to.deep.equal({
+          error: {
+            errorCode: "InvalidRequest",
+            errorMsg: "Error code specific error message",
+            timestamp: "2023-06-26T11:33:34.509Z",
+            txnid: "0b811819-9044-4856-b0ee-8c88035f8858",
+            ver: "2.0.0"
+          },
+          status: 400,
         });
       });
     });
