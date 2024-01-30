@@ -1,3 +1,6 @@
+/**
+ * This file is an implementation based on the Sahamati package Rahasya - https://github.com/Sahamati/rahasya
+ */
 import crypto, { CipherGCMTypes } from "crypto";
 export class Cipher {
   private algorithm: CipherGCMTypes = "aes-256-gcm";
