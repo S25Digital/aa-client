@@ -13,6 +13,7 @@ const AAClient = proxyquire("../src/client.ts", {
 import {
   baseUrl,
   consentDetail,
+  dateTime,
   keyPair,
   publicKey,
   setupNock,
@@ -34,7 +35,7 @@ let nockServer: Scope;
 
 describe("AA Client", () => {
   before(() => {
-    clock = useFakeTimers(new Date("2023-06-26T11:39:57.153Z"));
+    clock = useFakeTimers(new Date(dateTime));
   });
   after(() => {
     clock.restore();
@@ -111,6 +112,57 @@ describe("AA Client", () => {
           baseUrl,
           "token",
           Object.assign({}, consentDetail, { consentMode: "STORE" }),
+        );
+
+        expect(res).to.deep.equal({
+          error: {
+            errorCode: "InvalidRequest",
+            errorMsg: "Error code specific error message",
+            timestamp: "2023-06-26T11:33:34.509Z",
+            txnid: "0b811819-9044-4856-b0ee-8c88035f8858",
+            ver: "2.0.0"
+          },
+          status: 400,
+        });
+      });
+    });
+  });
+  describe("The getConsentByHandle method", () => {
+    beforeEach(() => {
+      nockServer = setupNock();
+    });
+    afterEach(() => {
+      nockServer.removeAllListeners();
+    });
+    describe("when it is successful", () => {
+      it("should return the appropriate response", async () => {
+        const res = await aaClient.getConsentByHandle(
+          baseUrl,
+          "token",
+          uuid,
+        );
+
+        expect(res).to.deep.equal({
+          data: {
+            "ver": "2.0.0",
+            "timestamp": "2023-06-26T11:39:57.153Z",
+            "txnid": "795038d3-86fb-4d3a-a681-2d39e8f4fc3c",
+            "ConsentHandle": "39e108fe-9243-11e8-b9f2-0256d88baae8",
+            "ConsentStatus": {
+              "id": "654024c8-29c8-11e8-8868-0289437bf331",
+              "status": "APPROVED"
+            }
+          },
+          status: 200
+        });
+      });
+    });
+    describe("when there is an error", () => {
+      it("should return the appropriate response", async () => {
+        const res = await aaClient.getConsentByHandle(
+          baseUrl,
+          "token",
+          "654024c8-bf331",
         );
 
         expect(res).to.deep.equal({

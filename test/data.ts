@@ -24,6 +24,8 @@ export const publicKey = {
 };
 
 export const baseUrl = "https://localhost:3000/v2";
+export const dateTime = "2023-06-26T11:39:57.153Z";
+export const uuid = "d5e26bff-3887-46a2-8ed2-962adeede7e4";
 export const consentDetail: IConstentDetail = {
   consentStart: "2019-12-06T11:39:57.153Z",
   consentExpiry: "2019-12-06T11:39:57.153Z",
@@ -70,19 +72,17 @@ export const consentDetail: IConstentDetail = {
   ],
 };
 
-export const uuid = "d5e26bff-3887-46a2-8ed2-962adeede7e4";
-
 export function setupNock() {
   return nock(baseUrl)
     .post("/Consent", {
       ConsentDetail: consentDetail,
       ver: "2.0.0",
-      timestamp: "2023-06-26T11:39:57.153Z",
+      timestamp: dateTime,
       txnid: uuid,
     } as any)
     .reply(200, {
       ver: "2.0.0",
-      timestamp: "2023-06-26T11:39:57.153Z",
+      timestamp: dateTime,
       txnid: uuid,
       Customer: {
         id: "9999999999@AA_identifier",
@@ -92,7 +92,7 @@ export function setupNock() {
     .post("/Consent", {
       ConsentDetail: Object.assign({}, consentDetail, { consentMode: "STORE" }),
       ver: "2.0.0",
-      timestamp: "2023-06-26T11:39:57.153Z",
+      timestamp: dateTime,
       txnid: uuid,
     } as any)
     .reply(400, {
@@ -101,5 +101,34 @@ export function setupNock() {
       timestamp: "2023-06-26T11:33:34.509Z",
       errorCode: "InvalidRequest",
       errorMsg: "Error code specific error message",
+    })
+    .post("/Consent/handle", {
+      ver: "2.0.0",
+      timestamp: dateTime,
+      txnid: uuid,
+      ConsentHandle: uuid,
+    })
+    .reply(200, {
+      ver: "2.0.0",
+      timestamp: "2023-06-26T11:39:57.153Z",
+      txnid: "795038d3-86fb-4d3a-a681-2d39e8f4fc3c",
+      ConsentHandle: "39e108fe-9243-11e8-b9f2-0256d88baae8",
+      ConsentStatus: {
+        id: "654024c8-29c8-11e8-8868-0289437bf331",
+        status: "APPROVED",
+      },
+    })
+    .post("/Consent/handle", {
+      ver: "2.0.0",
+      timestamp: dateTime,
+      txnid: uuid,
+      ConsentHandle: "654024c8-bf331",
+    })
+    .reply(400, {
+      "ver": "2.0.0",
+      "txnid": "0b811819-9044-4856-b0ee-8c88035f8858",
+      "timestamp": "2023-06-26T11:33:34.509Z",
+      "errorCode": "InvalidRequest",
+      "errorMsg": "Error code specific error message"
     });
 }
