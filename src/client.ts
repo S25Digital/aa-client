@@ -233,6 +233,7 @@ class AAClient {
           ...data,
           xmlData,
           jsonData,
+          keyMaterial: item.KeyMaterial
         });
       });
     });

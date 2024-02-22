@@ -12,6 +12,7 @@ import {
   IFIRequest,
   IFIRequestResponse,
   IKeys,
+  KeyMaterial,
 } from "./fi";
 import { IResponse } from "./common";
 interface IOptions {
@@ -71,6 +72,7 @@ declare class AAClient {
       linkRefNumber: string;
       maskedAccNumber: string;
       encryptedFI: string;
+      keyMaterial: KeyMaterial
     }>;
   }>;
 }
