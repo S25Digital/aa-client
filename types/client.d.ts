@@ -64,7 +64,14 @@ declare class AAClient {
     keys: IKeys,
   ): Promise<{
     response: IResponse<IFIFetchResponse>;
-    FIData?: Array<Record<string, any>>;
+    FIData?: Array<{
+      fipId: string;
+      xmlData: string;
+      jsonData: Record<string, any>;
+      linkRefNumber: string;
+      maskedAccNumber: string;
+      encryptedFI: string;
+    }>;
   }>;
 }
 export default AAClient;
