@@ -15,7 +15,7 @@ export function createKeyJson(): FITypes.IKeys {
   });
 
   const expiryDate = new Date();
-  expiryDate.setHours(expiryDate.getHours() + 24);
+  expiryDate.setHours(expiryDate.getHours() + 2);
   const expiryISO = expiryDate.toISOString();
 
   return {
@@ -28,6 +28,6 @@ export function createKeyJson(): FITypes.IKeys {
         KeyValue: publicKey.toString(),
       },
     },
-    nonce: v4()
+    nonce: Buffer.from(v4().replace(/-/g, "")).toString("base64"),
   };
 }
