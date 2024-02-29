@@ -22,8 +22,10 @@ export function createKeyJson(): FITypes.IKeys {
     privateKey,
     keyMaterial: {
       cryptoAlg: "ECDH",
-      curve: "Curve25519",
+      curve: "X25519",
+      params: "",
       DHPublicKey: {
+        Parameters: "",
         expiry: expiryISO,
         KeyValue: publicKey.toString(),
       },

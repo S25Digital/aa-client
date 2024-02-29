@@ -25,8 +25,10 @@ export interface IKeys {
   privateKey: string;
   keyMaterial: {
     cryptoAlg: "ECDH";
-    curve: "Curve25519";
+    curve: "X25519";
+    params: string,
     DHPublicKey: {
+      Parameters: string;
       expiry: string;
       KeyValue: string;
     };
