@@ -167,7 +167,6 @@ class AAClient {
       ...baseMapper.execute({}),
       ...body,
       KeyMaterial: keys.keyMaterial,
-      Nonce: keys.nonce,
     };
 
     const headers = await this._generateHeader(token, payload);
@@ -221,7 +220,7 @@ class AAClient {
         );
 
         const xmlData = await cipher.decrypt(
-          keys.nonce,
+          keys.keyMaterial.Nonce,
           item.KeyMaterial.Nonce,
           data.encryptedFI,
         );

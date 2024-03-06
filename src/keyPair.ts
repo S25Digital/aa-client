@@ -29,7 +29,7 @@ export function createKeyJson(): FITypes.IKeys {
         expiry: expiryISO,
         KeyValue: publicKey.toString(),
       },
+      Nonce: Buffer.from(v4().replace(/-/g, "")).toString("base64")
     },
-    nonce: Buffer.from(v4().replace(/-/g, "")).toString("base64"),
   };
 }

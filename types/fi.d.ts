@@ -32,8 +32,8 @@ export interface IKeys {
       expiry: string;
       KeyValue: string;
     };
+    Nonce: string;
   };
-  nonce: string;
 }
 
 export interface IFIFetchRequest {
