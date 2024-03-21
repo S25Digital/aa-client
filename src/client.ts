@@ -158,15 +158,16 @@ class AAClient {
     baseUrl: string,
     token: string,
     body: FITypes.IFIRequest,
+    keys?: FITypes.IKeys
   ): Promise<{
     keys: FITypes.IKeys;
     response: IResponse<FITypes.IFIRequestResponse>;
   }> {
-    const keys = createKeyJson();
+    const keyPair = keys ?? createKeyJson();
     const payload = {
       ...baseMapper.execute({}),
       ...body,
-      KeyMaterial: keys.keyMaterial,
+      KeyMaterial: keyPair.keyMaterial,
     };
 
     const headers = await this._generateHeader(token, payload);
@@ -177,7 +178,7 @@ class AAClient {
       payload,
       headers,
     );
-    return { response, keys };
+    return { response, keys: keyPair };
   }
 
   public async fetchFI(
@@ -185,6 +186,7 @@ class AAClient {
     token: string,
     body: FITypes.IFIFetchRequest,
     keys: FITypes.IKeys,
+    decrypt: boolean = false
   ): Promise<{
     response: IResponse<FITypes.IFIFetchResponse>;
     FIData?: Array<Record<string, any>>;
@@ -212,30 +214,32 @@ class AAClient {
 
     const FIData: Array<Record<string, any>> = [];
 
-    FI.forEach((item) => {
-      item.data.forEach(async (data) => {
-        const cipher = new Cipher(
-          keys.privateKey,
-          item.KeyMaterial.DHPublicKey.KeyValue,
-        );
-
-        const xmlData = await cipher.decrypt(
-          keys.keyMaterial.Nonce,
-          item.KeyMaterial.Nonce,
-          data.encryptedFI,
-        );
-
-        const jsonData = this._parser.parse(xmlData);
-
-        FIData.push({
-          fip: item.fipID,
-          ...data,
-          xmlData,
-          jsonData,
-          keyMaterial: item.KeyMaterial
+    if(decrypt === true && keys.keyMaterial.curve === "X25519"){
+      FI.forEach((item) => {
+        item.data.forEach(async (data) => {
+          const cipher = new Cipher(
+            keys.privateKey,
+            item.KeyMaterial.DHPublicKey.KeyValue,
+          );
+  
+          const xmlData = await cipher.decrypt(
+            keys.keyMaterial.Nonce,
+            item.KeyMaterial.Nonce,
+            data.encryptedFI,
+          );
+  
+          const jsonData = this._parser.parse(xmlData);
+  
+          FIData.push({
+            fip: item.fipID,
+            ...data,
+            xmlData,
+            jsonData,
+            keyMaterial: item.KeyMaterial
+          });
         });
       });
-    });
+    }
 
     return {
       response,
