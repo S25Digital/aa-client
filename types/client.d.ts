@@ -54,6 +54,7 @@ declare class AAClient {
     baseUrl: string,
     token: string,
     body: IFIRequest,
+    keys?: IKeys
   ): Promise<{
     keys: IKeys;
     response: IResponse<IFIRequestResponse>;
@@ -62,7 +63,8 @@ declare class AAClient {
     baseUrl: string,
     token: string,
     body: IFIFetchRequest,
-    keys: IKeys,
+    keys?: IKeys,
+    decrypt: boolean = false
   ): Promise<{
     response: IResponse<IFIFetchResponse>;
     FIData?: Array<{

@@ -185,7 +185,7 @@ class AAClient {
     baseUrl: string,
     token: string,
     body: FITypes.IFIFetchRequest,
-    keys: FITypes.IKeys,
+    keys?: FITypes.IKeys,
     decrypt: boolean = false
   ): Promise<{
     response: IResponse<FITypes.IFIFetchResponse>;
@@ -214,7 +214,7 @@ class AAClient {
 
     const FIData: Array<Record<string, any>> = [];
 
-    if(decrypt === true && keys.keyMaterial.curve === "X25519"){
+    if(decrypt === true && keys?.keyMaterial?.curve === "X25519"){
       FI.forEach((item) => {
         item.data.forEach(async (data) => {
           const cipher = new Cipher(
