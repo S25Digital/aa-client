@@ -1,2 +1,2 @@
 # [WIP] aa-client
-AA Client for Account Aggregator Ecosystem
+AA Client for Account Aggregator Ecosystem.
