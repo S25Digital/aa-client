@@ -185,8 +185,6 @@ class AAClient {
     baseUrl: string,
     token: string,
     body: FITypes.IFIFetchRequest,
-    keys?: FITypes.IKeys,
-    decrypt: boolean = false
   ): Promise<{
     response: IResponse<FITypes.IFIFetchResponse>;
     FIData?: Array<Record<string, any>>;
@@ -210,42 +208,76 @@ class AAClient {
       };
     }
 
-    const FI = response.data.FI;
-
-    const FIData: Array<Record<string, any>> = [];
-
-    if(decrypt === true && keys?.keyMaterial?.curve === "X25519"){
-      FI.forEach((item) => {
-        item.data.forEach(async (data) => {
-          const cipher = new Cipher(
-            keys.privateKey,
-            item.KeyMaterial.DHPublicKey.KeyValue,
-          );
-  
-          const xmlData = await cipher.decrypt(
-            keys.keyMaterial.Nonce,
-            item.KeyMaterial.Nonce,
-            data.encryptedFI,
-          );
-  
-          const jsonData = this._parser.parse(xmlData);
-  
-          FIData.push({
-            fip: item.fipID,
-            ...data,
-            xmlData,
-            jsonData,
-            keyMaterial: item.KeyMaterial
-          });
-        });
-      });
-    }
-
     return {
-      response,
-      FIData,
+      response
     };
   }
+
+  // public async fetchFIWithDecryption(
+  //   baseUrl: string,
+  //   token: string,
+  //   body: FITypes.IFIFetchRequest,
+  //   keys?: FITypes.IKeys,
+  //   decrypt: boolean = false
+  // ): Promise<{
+  //   response: IResponse<FITypes.IFIFetchResponse>;
+  //   FIData?: Array<Record<string, any>>;
+  // }> {
+  //   const payload = {
+  //     ...baseMapper.execute({}),
+  //     ...body,
+  //   };
+  //   const headers = await this._generateHeader(token, payload);
+  //   const url = `${baseUrl}/FI/fetch`;
+
+  //   const response = await this._postRequest<FITypes.IFIFetchResponse>(
+  //     url,
+  //     payload,
+  //     headers,
+  //   );
+
+  //   if (!response.data) {
+  //     return {
+  //       response,
+  //     };
+  //   }
+
+  //   const FI = response.data.FI;
+
+  //   const FIData: Array<Record<string, any>> = [];
+
+  //   if(decrypt === true && keys?.keyMaterial?.curve === "X25519"){
+  //     FI.forEach((item) => {
+  //       item.data.forEach(async (data) => {
+  //         const cipher = new Cipher(
+  //           keys.privateKey,
+  //           item.KeyMaterial.DHPublicKey.KeyValue,
+  //         );
+  
+  //         const xmlData = await cipher.decrypt(
+  //           keys.keyMaterial.Nonce,
+  //           item.KeyMaterial.Nonce,
+  //           data.encryptedFI,
+  //         );
+  
+  //         const jsonData = this._parser.parse(xmlData);
+  
+  //         FIData.push({
+  //           fip: item.fipID,
+  //           ...data,
+  //           xmlData,
+  //           jsonData,
+  //           keyMaterial: item.KeyMaterial
+  //         });
+  //       });
+  //     });
+  //   }
+
+  //   return {
+  //     response,
+  //     FIData,
+  //   };
+  // }
 }
 
 export default AAClient;
