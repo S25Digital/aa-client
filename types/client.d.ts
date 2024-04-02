@@ -66,23 +66,5 @@ declare class AAClient {
   ): Promise<{
     response: IResponse<IFIFetchResponse>;
   }>;
-  // fetchFIWithDecryption(
-  //   baseUrl: string,
-  //   token: string,
-  //   body: IFIFetchRequest,
-  //   keys?: IKeys,
-  //   decrypt: boolean = false
-  // ): Promise<{
-  //   response: IResponse<IFIFetchResponse>;
-  //   FIData?: Array<{
-  //     fipId: string;
-  //     xmlData: string;
-  //     jsonData: Record<string, any>;
-  //     linkRefNumber: string;
-  //     maskedAccNumber: string;
-  //     encryptedFI: string;
-  //     keyMaterial: KeyMaterial
-  //   }>;
-  // }>;
 }
 export default AAClient;
