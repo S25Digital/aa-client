@@ -28,6 +28,8 @@ describe("The Cipher Class", () => {
         JSON.stringify(data),
       );
 
+      console.log(encryptedData);
+
       const decryptedData = await cipher2.decrypt(
         participantA.keyMaterial.Nonce,
         participantB.keyMaterial.Nonce,
