@@ -1,6 +1,3 @@
-/**
- * This file is an implementation based on the Sahamati package Rahasya - https://github.com/Sahamati/rahasya
- */
 import crypto, { CipherGCMTypes } from "crypto";
 export class Cipher {
   private algorithm: CipherGCMTypes = "aes-256-gcm";
@@ -57,10 +54,11 @@ export class Cipher {
     const cipher = crypto.createCipheriv(this.algorithm, sessionKey, iv, {
       authTagLength: this._gcmTagLength,
     });
+
     let encrypted = cipher.update(data, "utf8");
     encrypted = Buffer.concat([encrypted, cipher.final()]);
     const authTag = cipher.getAuthTag();
-    return `${encrypted.toString("base64")}:${authTag.toString("base64")}`;
+    return Buffer.concat([encrypted, authTag]).toString("base64");
   }
 
   // Method to decrypt data
@@ -79,12 +77,12 @@ export class Cipher {
       this.saltIVOffset,
       this.saltIVOffset + this.ivLength,
     );
-    const [encryptedData, authTag] = base64EncodedData.split(":");
-    const decipher = crypto.createDecipheriv(this.algorithm, sessionKey, iv, {
-      authTagLength: this._gcmTagLength,
-    });
-    decipher.setAuthTag(Buffer.from(authTag, "base64"));
-    let decrypted = decipher.update(encryptedData, "base64", "utf8");
+    const encryptedDataWithAuthTag = Buffer.from(base64EncodedData, 'base64');
+    const encryptedData = encryptedDataWithAuthTag.slice(0, encryptedDataWithAuthTag.length - this._gcmTagLength);
+    const authTag = encryptedDataWithAuthTag.slice(encryptedDataWithAuthTag.length - this._gcmTagLength);
+    const decipher = crypto.createDecipheriv(this.algorithm, sessionKey, iv);
+    decipher.setAuthTag(authTag);
+    let decrypted = decipher.update(encryptedData, undefined, "utf8");
     decrypted += decipher.final("utf8");
     return decrypted;
   }
