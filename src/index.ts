@@ -10,5 +10,3 @@ export function createAAClient(privateKey: JWK){
     httpClient: axios
   });
 }
-
-export * from "./cipher";
