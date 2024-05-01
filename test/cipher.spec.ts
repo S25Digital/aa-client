@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Cipher } from "../src";
+import { Cipher } from "../src/cipher";
 import { createKeyJson } from "../src/keyPair";
 
 const participantA = createKeyJson();
