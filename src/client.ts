@@ -5,7 +5,6 @@ import { XMLParser } from "fast-xml-parser";
 import { ConsentTypes, FITypes, IResponse } from "../types";
 import { createKeyJson } from "./keyPair";
 import { baseMapper } from "./mapper";
-import { Cipher } from "./cipher";
 
 interface IOptions {
   privateKey: JWK;
@@ -15,12 +14,10 @@ interface IOptions {
 class AAClient {
   private _pvtKey: JWK;
   private _httpClient: Axios;
-  private _parser: XMLParser;
 
   constructor(opts: IOptions) {
     this._pvtKey = opts.privateKey;
     this._httpClient = opts.httpClient;
-    this._parser = new XMLParser();
   }
 
   private async _generateHeader(token: string, payload: Record<string, any>) {
@@ -163,7 +160,7 @@ class AAClient {
     keys: FITypes.IKeys;
     response: IResponse<FITypes.IFIRequestResponse>;
   }> {
-    const keyPair = keys ?? createKeyJson();
+    const keyPair = keys ? keys : createKeyJson();
     const payload = {
       ...baseMapper.execute({}),
       ...body,
