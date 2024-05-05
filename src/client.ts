@@ -1,9 +1,7 @@
 import { Axios } from "axios";
 import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
-import { XMLParser } from "fast-xml-parser";
 
 import { ConsentTypes, FITypes, IResponse } from "../types";
-import { createKeyJson } from "./keyPair";
 import { baseMapper } from "./mapper";
 
 interface IOptions {
@@ -155,16 +153,19 @@ class AAClient {
     baseUrl: string,
     token: string,
     body: FITypes.IFIRequest,
-    keys?: FITypes.IKeys
+    keys: FITypes.IKeys
   ): Promise<{
     keys: FITypes.IKeys;
     response: IResponse<FITypes.IFIRequestResponse>;
   }> {
-    const keyPair = keys ? keys : createKeyJson();
+    if(!keys) {
+      throw new Error("Keys are required");
+    }
+
     const payload = {
       ...baseMapper.execute({}),
       ...body,
-      KeyMaterial: keyPair.keyMaterial,
+      KeyMaterial: keys.keyMaterial,
     };
 
     const headers = await this._generateHeader(token, payload);
@@ -175,7 +176,7 @@ class AAClient {
       payload,
       headers,
     );
-    return { response, keys: keyPair };
+    return { response, keys };
   }
 
   public async fetchFI(

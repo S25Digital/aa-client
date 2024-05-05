@@ -54,7 +54,7 @@ declare class AAClient {
     baseUrl: string,
     token: string,
     body: IFIRequest,
-    keys?: IKeys
+    keys: IKeys
   ): Promise<{
     keys: IKeys;
     response: IResponse<IFIRequestResponse>;
