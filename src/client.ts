@@ -79,12 +79,11 @@ class AAClient {
       }
 
       const key = await importJWK(publicKey, "RS256");
-      const encodedPayload = new TextEncoder().encode(JSON.stringify(payload));
       await flattenedVerify(
         {
           protected: parts[0],
           signature: parts[2],
-          payload: encodedPayload,
+          payload: JSON.stringify(payload),
         },
         key,
       );
