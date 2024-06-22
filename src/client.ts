@@ -52,6 +52,29 @@ class AAClient {
     }
   }
 
+  private async _getRequest<T = Record<string, any>>(
+    url: string,
+    headers: Record<string, any> = {},
+  ): Promise<IResponse<T>> {
+    try {
+      const res = await this._httpClient.request({
+        url,
+        method: "GET",
+        headers,
+      });
+
+      return {
+        status: res.status,
+        data: res.data,
+      };
+    } catch (err) {
+      return Promise.resolve({
+        status: err.response.status,
+        error: err.response.data,
+      });
+    }
+  }
+
   public async generateDetachedJWS(
     payload: Record<string, any>,
   ): Promise<string> {
@@ -208,6 +231,18 @@ class AAClient {
     return {
       response
     };
+  }
+
+  public async getHeartBeat(baseUrl: string) {
+    const headers = {
+      "Content-Type": "application/json"
+    };
+    const url = `${baseUrl}/Heartbeat`;
+
+    return await this._getRequest<ConsentTypes.IHeartbeat>(
+      url,
+      headers,
+    );
   }
 }
 
