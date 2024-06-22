@@ -122,12 +122,23 @@ export interface IConsentByIdResponse {
   ver: string;
   txnid: string;
   consentId: string;
-  status: "ACTIVE"| "PAUSED"| "REVOKED"| "EXPIRE";
+  status: "ACTIVE" | "PAUSED" | "REVOKED" | "EXPIRE";
   createTimestamp: string;
   signedConsent: string;
   ConsentUse: {
     logUri: string;
     count: number;
     lastUseDateTime: string;
+  };
+}
+
+export interface IHeartbeat {
+  ver: string;
+  timestamp: string;
+  Status: "UP" | "DOWN";
+  Error: {
+    code: number;
+    msg: string;
+    detail: string;
   };
 }
