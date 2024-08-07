@@ -15,14 +15,16 @@ import {
   KeyMaterial,
 } from "./fi";
 import { IResponse } from "./common";
+import { Logger } from "pino";
 interface IOptions {
   privateKey: JWK;
   httpClient: Axios;
+  logger: Logger
 }
 declare class AAClient {
   private _pvtKey;
   private _httpClient;
-  private _parser;
+  private _logger;
   constructor(opts: IOptions);
   private _generateHeader;
   private _postRequest;

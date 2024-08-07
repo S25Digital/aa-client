@@ -3,19 +3,23 @@ import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
 
 import { ConsentTypes, FITypes, IResponse } from "../types";
 import { baseMapper } from "./mapper";
+import { Logger } from "pino";
 
 interface IOptions {
   privateKey: JWK;
   httpClient: Axios;
+  logger: Logger
 }
 
 class AAClient {
   private _pvtKey: JWK;
   private _httpClient: Axios;
+  private _logger: Logger;
 
   constructor(opts: IOptions) {
     this._pvtKey = opts.privateKey;
     this._httpClient = opts.httpClient;
+    this._logger = opts.logger;
   }
 
   private async _generateHeader(token: string, payload: Record<string, any>) {
@@ -40,14 +44,22 @@ class AAClient {
         data: JSON.stringify(payload),
       });
 
+      this._logger.debug({
+        "message": "request successful",
+        res: res?.data
+      });
+
       return {
-        status: res.status,
-        data: res.data,
+        status: res?.status,
+        data: res?.data,
       };
     } catch (err) {
+      this._logger.error({
+        error: err
+      });
       return Promise.resolve({
-        status: err.response.status,
-        error: err.response.data,
+        status: err?.response?.status,
+        error: err?.response?.data,
       });
     }
   }
@@ -63,14 +75,22 @@ class AAClient {
         headers,
       });
 
+      this._logger.debug({
+        "message": "request successful",
+        res: res?.data
+      });
+
       return {
         status: res.status,
         data: res.data,
       };
     } catch (err) {
+      this._logger.error({
+        error: err
+      });
       return Promise.resolve({
-        status: err.response.status,
-        error: err.response.data,
+        status: err?.response?.status,
+        error: err?.response?.data,
       });
     }
   }
@@ -110,11 +130,18 @@ class AAClient {
         },
         key,
       );
+      this._logger.debug({
+        "message": "request successful",
+        isVerified: true
+      });
       return { isVerified: true };
-    } catch (error) {
+    } catch (err) {
+      this._logger.error({
+        error: err
+      });
       return Promise.resolve({
         isVerified: false,
-        message: error?.message ?? "Invalid Signature",
+        message: err?.message ?? "Invalid Signature",
       });
     }
   }
