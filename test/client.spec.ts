@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { SinonFakeTimers, useFakeTimers, stub } from "sinon";
+import { SinonFakeTimers, useFakeTimers, stub, spy } from "sinon";
 import proxyquire from "proxyquire";
 
 const { baseMapper } = proxyquire("../src/mapper.ts", {
@@ -22,9 +22,15 @@ import {
 import { Scope } from "nock";
 import axios from "axios";
 
+const logger: any = {
+  error: spy(),
+  debug: spy()
+};
+
 const aaClient = new AAClient({
   privateKey: keyPair,
   httpClient: axios,
+  logger
 });
 
 const body = {
