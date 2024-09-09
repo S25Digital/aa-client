@@ -8,7 +8,7 @@ import { Logger } from "pino";
 interface IOptions {
   privateKey: JWK;
   httpClient: Axios;
-  logger: Logger
+  logger: Logger;
 }
 
 class AAClient {
@@ -27,7 +27,7 @@ class AAClient {
     return {
       client_api_key: token,
       "x-jws-signature": signature,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     };
   }
 
@@ -45,8 +45,18 @@ class AAClient {
       });
 
       this._logger.debug({
-        "message": "request successful",
-        res: res?.data
+        message: "debugging request",
+        data: {
+          url,
+          method: "POST",
+          headers,
+          data: JSON.stringify(payload),
+        },
+      });
+
+      this._logger.debug({
+        message: "request successful",
+        res: res?.data,
       });
 
       return {
@@ -55,7 +65,7 @@ class AAClient {
       };
     } catch (err) {
       this._logger.error({
-        error: err
+        error: err,
       });
       return Promise.resolve({
         status: err?.response?.status,
@@ -76,8 +86,8 @@ class AAClient {
       });
 
       this._logger.debug({
-        "message": "request successful",
-        res: res?.data
+        message: "request successful",
+        res: res?.data,
       });
 
       return {
@@ -86,7 +96,7 @@ class AAClient {
       };
     } catch (err) {
       this._logger.error({
-        error: err
+        error: err,
       });
       return Promise.resolve({
         status: err?.response?.status,
@@ -131,13 +141,13 @@ class AAClient {
         key,
       );
       this._logger.debug({
-        "message": "request successful",
-        isVerified: true
+        message: "request successful",
+        isVerified: true,
       });
       return { isVerified: true };
     } catch (err) {
       this._logger.error({
-        error: err
+        error: err,
       });
       return Promise.resolve({
         isVerified: false,
@@ -202,12 +212,12 @@ class AAClient {
     baseUrl: string,
     token: string,
     body: FITypes.IFIRequest,
-    keys: FITypes.IKeys
+    keys: FITypes.IKeys,
   ): Promise<{
     keys: FITypes.IKeys;
     response: IResponse<FITypes.IFIRequestResponse>;
   }> {
-    if(!keys) {
+    if (!keys) {
       throw new Error("Keys are required");
     }
 
@@ -256,20 +266,17 @@ class AAClient {
     }
 
     return {
-      response
+      response,
     };
   }
 
   public async getHeartBeat(baseUrl: string) {
     const headers = {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     };
     const url = `${baseUrl}/Heartbeat`;
 
-    return await this._getRequest<ConsentTypes.IHeartbeat>(
-      url,
-      headers,
-    );
+    return await this._getRequest<ConsentTypes.IHeartbeat>(url, headers);
   }
 }
 
