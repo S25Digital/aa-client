@@ -38,7 +38,7 @@ type FITypes =
 
 interface Customer {
   id: string;
-  Identifiers: Identifier[];
+  Identifiers?: Identifier[];
 }
 
 interface Identifier {
