@@ -1,45 +1,205 @@
+# AAClient
 
-# AA CLient
+`aa-client` is a TypeScript library designed for interacting with the AA (Account Aggregator) ecosystem. It provides functionality for managing consents, handling financial information requests, and verifying signatures using JSON Web Tokens (JWTs) with RS256 algorithms.
 
-The client is used in FIU to connect it with preferred AA partner.
+## Features
 
+- **Consent Management**: Raise and retrieve consents by handle or ID.
+- **Financial Information Requests**: Raise and fetch financial information requests.
+- **Signature Verification**: Generate and verify JWT signatures.
+- **Heartbeat Check**: Perform a heartbeat check to ensure the service is operational.
 
-## Badges
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+## Installation
 
-
-## Run Locally
-
-Install dependencies
-
-```bash
-  npm install
-```
-
-Run test cases
+To install `aa-client`, use npm or yarn:
 
 ```bash
-  npm run test
+npm install aa-client
 ```
 
+or
 
-## Usage/Examples
-
-```javascript
-import {createAAClient} from '@s25digital/aa-client'
-
-const client = createAAClient({}) // JWK keypair set - Public and private
+```bash
+yarn add aa-client
 ```
 
+## Usage
 
-## Related
+### Creating an Instance
 
-If you are looking to connect to AA Central registry, you can use the following project
+Use the `createAAClient` function to create an instance of the `AAClient`:
 
-[aa-central-registry ](https://github.com/S25Digital/aa-central-registry)
+```typescript
+import { createAAClient } from 'aa-client';
+import { JWK } from 'jose';
 
+// Define your JWK private key
+const privateKey = JWK.asKey({ /* Your JWK private key here */ }, 'RS256');
 
-## Support
+// Create an instance of AAClient with a specific logging level
+const client = createAAClient(privateKey, 'debug'); // Logging level can be 'error' or 'debug'
+```
 
-Please raise an issue.
+### Example Usage
 
+```typescript
+// Example: Raise consent
+client.raiseConsent('https://api.example.com', 'your-api-key', { /* consent details */ })
+  .then(response => {
+    console.log('Consent raised:', response);
+  })
+  .catch(error => {
+    console.error('Error raising consent:', error);
+  });
+
+// Example: Fetch financial information
+client.fetchFI('https://api.example.com', 'your-api-key', { /* request details */ })
+  .then(response => {
+    console.log('Financial Information:', response);
+  })
+  .catch(error => {
+    console.error('Error fetching financial information:', error);
+  });
+```
+
+## API Reference
+
+### `createAAClient`
+
+```typescript
+createAAClient(privateKey: JWK, level?: 'error' | 'debug'): AAClient
+```
+
+- **Parameters**:
+  - `privateKey` (JWK): JSON Web Key used for signing JWTs.
+  - `level` (string, optional): Logging level, can be `'error'` or `'debug'`. Defaults to `'error'`.
+- **Returns**: An instance of `AAClient`.
+- **Description**: Creates and returns an instance of `AAClient` with the specified logging level.
+
+### `AAClient`
+
+#### Methods
+
+- **`generateDetachedJWS(payload: Record<string, any>)`**
+
+  ```typescript
+  client.generateDetachedJWS(payload: Record<string, any>): Promise<string>
+  ```
+
+  - **Parameters**:
+    - `payload` (object): Data to be signed.
+  - **Returns**: `Promise<string>` - The generated detached JWT signature.
+  - **Description**: Generates a detached JSON Web Signature (JWS) for the given payload.
+
+- **`verifySignature(payload: Record<string, any>, signature: string, publicKey: JWK)`**
+
+  ```typescript
+  client.verifySignature(payload: Record<string, any>, signature: string, publicKey: JWK): Promise<{ isVerified: boolean; message?: string }>
+  ```
+
+  - **Parameters**:
+    - `payload` (object): Data that was signed.
+    - `signature` (string): JWT signature to verify.
+    - `publicKey` (JWK): JSON Web Key used for verification.
+  - **Returns**: `Promise<{ isVerified: boolean; message?: string }>` - Verification result.
+  - **Description**: Verifies the signature of a given payload.
+
+- **`raiseConsent(baseUrl: string, token: string, consentDetail: ConsentTypes.IConstentDetail)`**
+
+  ```typescript
+  client.raiseConsent(baseUrl: string, token: string, consentDetail: ConsentTypes.IConstentDetail): Promise<IResponse<ConsentTypes.IConsentResponse>>
+  ```
+
+  - **Parameters**:
+    - `baseUrl` (string): Base URL for the API.
+    - `token` (string): API key or token.
+    - `consentDetail` (ConsentTypes.IConstentDetail): Details of the consent to be raised.
+  - **Returns**: `Promise<IResponse<ConsentTypes.IConsentResponse>>` - Response from the API.
+  - **Description**: Raises a consent request with the provided details.
+
+- **`getConsentByHandle(baseUrl: string, token: string, handle: string)`**
+
+  ```typescript
+  client.getConsentByHandle(baseUrl: string, token: string, handle: string): Promise<IResponse<ConsentTypes.IConsentByHandleResponse>>
+  ```
+
+  - **Parameters**:
+    - `baseUrl` (string): Base URL for the API.
+    - `token` (string): API key or token.
+    - `handle` (string): Consent handle.
+  - **Returns**: `Promise<IResponse<ConsentTypes.IConsentByHandleResponse>>` - Response from the API.
+  - **Description**: Retrieves consent details by handle.
+
+- **`getConsentById(baseUrl: string, token: string, id: string)`**
+
+  ```typescript
+  client.getConsentById(baseUrl: string, token: string, id: string): Promise<IResponse<ConsentTypes.IConsentByIdResponse>>
+  ```
+
+  - **Parameters**:
+    - `baseUrl` (string): Base URL for the API.
+    - `token` (string): API key or token.
+    - `id` (string): Consent ID.
+  - **Returns**: `Promise<IResponse<ConsentTypes.IConsentByIdResponse>>` - Response from the API.
+  - **Description**: Retrieves consent details by ID.
+
+- **`raiseFIRequest(baseUrl: string, token: string, body: FITypes.IFIRequest, keys: FITypes.IKeys)`**
+
+  ```typescript
+  client.raiseFIRequest(baseUrl: string, token: string, body: FITypes.IFIRequest, keys: FITypes.IKeys): Promise<{ keys: FITypes.IKeys; response: IResponse<FITypes.IFIRequestResponse> }>
+  ```
+
+  - **Parameters**:
+    - `baseUrl` (string): Base URL for the API.
+    - `token` (string): API key or token.
+    - `body` (FITypes.IFIRequest): Request body.
+    - `keys` (FITypes.IKeys): Keys for the request.
+  - **Returns**: `Promise<{ keys: FITypes.IKeys; response: IResponse<FITypes.IFIRequestResponse> }>` - Response from the API and keys.
+  - **Description**: Raises a financial information request.
+
+- **`fetchFI(baseUrl: string, token: string, body: FITypes.IFIFetchRequest)`**
+
+  ```typescript
+  client.fetchFI(baseUrl: string, token: string, body: FITypes.IFIFetchRequest): Promise<{ response: IResponse<FITypes.IFIFetchResponse>; FIData?: Array<Record<string, any>> }>
+  ```
+
+  - **Parameters**:
+    - `baseUrl` (string): Base URL for the API.
+    - `token` (string): API key or token.
+    - `body` (FITypes.IFIFetchRequest): Fetch request body.
+  - **Returns**: `Promise<{ response: IResponse<FITypes.IFIFetchResponse>; FIData?: Array<Record<string, any>> }>` - Response from the API and optionally, fetched financial data.
+  - **Description**: Fetches financial information.
+
+- **`getHeartBeat(baseUrl: string)`**
+
+  ```typescript
+  client.getHeartBeat(baseUrl: string): Promise<IResponse<ConsentTypes.IHeartbeat>>
+  ```
+
+  - **Parameters**:
+    - `baseUrl` (string): Base URL for the API.
+  - **Returns**: `Promise<IResponse<ConsentTypes.IHeartbeat>>` - Response from the API.
+  - **Description**: Performs a heartbeat check to ensure the service is operational.
+
+## Configuration
+
+You need to provide the following configuration when creating an instance of `AAClient`:
+
+```typescript
+import { createAAClient } from 'aa-client';
+import { JWK } from 'jose';
+
+// Define your JWK private key
+const privateKey = JWK.asKey({ /* Your JWK private key here */ }, 'RS256');
+
+// Create an instance of AAClient with a specific logging level
+const client = createAAClient(privateKey, 'debug'); // Logging level can be 'error' or 'debug'
+```
+
+## License
+
+`aa-client` is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+For questions or support, please open an issue on GitHub or contact us at [contact@s25.digital](mailto:contact@s25.digital).
