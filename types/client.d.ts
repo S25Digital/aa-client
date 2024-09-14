@@ -41,22 +41,26 @@ declare class AAClient {
     baseUrl: string,
     token: string,
     consentDetail: IConstentDetail,
+    publicKey: JWK,
   ): Promise<IResponse<IConsentResponse>>;
   getConsentByHandle(
     baseUrl: string,
     token: string,
     handle: string,
+    publicKey: JWK,
   ): Promise<IResponse<IConsentByHandleResponse>>;
   getConsentById(
     baseUrl: string,
     token: string,
     id: string,
+    publicKey: JWK,
   ): Promise<IResponse<IConsentByIdResponse>>;
   raiseFIRequest(
     baseUrl: string,
     token: string,
     body: IFIRequest,
-    keys: IKeys
+    keys: IKeys,
+    publicKey: JWK,
   ): Promise<{
     keys: IKeys;
     response: IResponse<IFIRequestResponse>;
@@ -65,6 +69,7 @@ declare class AAClient {
     baseUrl: string,
     token: string,
     body: IFIFetchRequest,
+    publicKey: JWK,
   ): Promise<{
     response: IResponse<IFIFetchResponse>;
   }>;
