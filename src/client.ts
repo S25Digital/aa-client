@@ -35,6 +35,7 @@ class AAClient {
     url: string,
     payload: Record<string, any>,
     headers: Record<string, any> = {},
+    publicKey: JWK,
   ): Promise<IResponse<T>> {
     try {
       const res = await this._httpClient.request({
@@ -58,6 +59,24 @@ class AAClient {
         message: "request successful",
         res: res?.data,
       });
+
+      // validate the jws signature of response
+
+      const signature = res?.headers["x-jws-signature"];
+      const vRes = await this.verifySignature(res.data, signature, publicKey);
+
+      if (vRes.isVerified === false) {
+        return {
+          status: 400,
+          error: {
+            ver: "2.0.0",
+            txnid: res?.data?.txnid,
+            timestamp: res?.data.timestamp,
+            errorCode: "SignatureDoesNotMatch",
+            errorMsg: "Response signature is not valid",
+          },
+        };
+      }
 
       return {
         status: res?.status,
@@ -160,6 +179,7 @@ class AAClient {
     baseUrl: string,
     token: string,
     consentDetail: ConsentTypes.IConstentDetail,
+    publicKey: JWK,
   ) {
     const payload = {
       ConsentDetail: consentDetail,
@@ -171,6 +191,7 @@ class AAClient {
       url,
       payload,
       headers,
+      publicKey,
     );
   }
 
@@ -178,6 +199,7 @@ class AAClient {
     baseUrl: string,
     token: string,
     handle: string,
+    publicKey: JWK,
   ) {
     const payload = {
       ...baseMapper.execute({}),
@@ -190,10 +212,16 @@ class AAClient {
       url,
       payload,
       headers,
+      publicKey,
     );
   }
 
-  public async getConsentById(baseUrl: string, token: string, id: string) {
+  public async getConsentById(
+    baseUrl: string,
+    token: string,
+    id: string,
+    publicKey: JWK
+  ) {
     const payload = {
       ...baseMapper.execute({}),
       consentId: id,
@@ -205,6 +233,7 @@ class AAClient {
       url,
       payload,
       headers,
+      publicKey
     );
   }
 
@@ -213,6 +242,7 @@ class AAClient {
     token: string,
     body: FITypes.IFIRequest,
     keys: FITypes.IKeys,
+    publicKey: JWK,
   ): Promise<{
     keys: FITypes.IKeys;
     response: IResponse<FITypes.IFIRequestResponse>;
@@ -234,6 +264,7 @@ class AAClient {
       url,
       payload,
       headers,
+      publicKey
     );
     return { response, keys };
   }
@@ -242,6 +273,7 @@ class AAClient {
     baseUrl: string,
     token: string,
     body: FITypes.IFIFetchRequest,
+    publicKey: JWK,
   ): Promise<{
     response: IResponse<FITypes.IFIFetchResponse>;
     FIData?: Array<Record<string, any>>;
@@ -257,6 +289,7 @@ class AAClient {
       url,
       payload,
       headers,
+      publicKey
     );
 
     if (!response.data) {

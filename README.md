@@ -44,7 +44,7 @@ const client = createAAClient(privateKey, 'debug'); // Logging level can be 'err
 
 ```typescript
 // Example: Raise consent
-client.raiseConsent('https://api.example.com', 'your-api-key', { /* consent details */ })
+client.raiseConsent('https://api.example.com', 'your-api-key', { /* consent details */ }, "aapublickey")
   .then(response => {
     console.log('Consent raised:', response);
   })
@@ -53,7 +53,7 @@ client.raiseConsent('https://api.example.com', 'your-api-key', { /* consent deta
   });
 
 // Example: Fetch financial information
-client.fetchFI('https://api.example.com', 'your-api-key', { /* request details */ })
+client.fetchFI('https://api.example.com', 'your-api-key', { /* request details */ },"aapublickey")
   .then(response => {
     console.log('Financial Information:', response);
   })
@@ -104,7 +104,7 @@ createAAClient(privateKey: JWK, level?: 'error' | 'debug'): AAClient
   - **Returns**: `Promise<{ isVerified: boolean; message?: string }>` - Verification result.
   - **Description**: Verifies the signature of a given payload.
 
-- **`raiseConsent(baseUrl: string, token: string, consentDetail: ConsentTypes.IConstentDetail)`**
+- **`raiseConsent(baseUrl: string, token: string, consentDetail: ConsentTypes.IConstentDetail, publicKey: JWK)`**
 
   ```typescript
   client.raiseConsent(baseUrl: string, token: string, consentDetail: ConsentTypes.IConstentDetail): Promise<IResponse<ConsentTypes.IConsentResponse>>
@@ -114,10 +114,11 @@ createAAClient(privateKey: JWK, level?: 'error' | 'debug'): AAClient
     - `baseUrl` (string): Base URL for the API.
     - `token` (string): API key or token.
     - `consentDetail` (ConsentTypes.IConstentDetail): Details of the consent to be raised.
+    - `publicKey` (JWK): The public Key of the AA. This is required to verify the response signature
   - **Returns**: `Promise<IResponse<ConsentTypes.IConsentResponse>>` - Response from the API.
   - **Description**: Raises a consent request with the provided details.
 
-- **`getConsentByHandle(baseUrl: string, token: string, handle: string)`**
+- **`getConsentByHandle(baseUrl: string, token: string, handle: string, publicKey: JWK)`**
 
   ```typescript
   client.getConsentByHandle(baseUrl: string, token: string, handle: string): Promise<IResponse<ConsentTypes.IConsentByHandleResponse>>
@@ -127,10 +128,11 @@ createAAClient(privateKey: JWK, level?: 'error' | 'debug'): AAClient
     - `baseUrl` (string): Base URL for the API.
     - `token` (string): API key or token.
     - `handle` (string): Consent handle.
+    - `publicKey` (JWK): The public Key of the AA. This is required to verify the response signature
   - **Returns**: `Promise<IResponse<ConsentTypes.IConsentByHandleResponse>>` - Response from the API.
   - **Description**: Retrieves consent details by handle.
 
-- **`getConsentById(baseUrl: string, token: string, id: string)`**
+- **`getConsentById(baseUrl: string, token: string, id: string, publicKey: JWK)`**
 
   ```typescript
   client.getConsentById(baseUrl: string, token: string, id: string): Promise<IResponse<ConsentTypes.IConsentByIdResponse>>
@@ -140,10 +142,11 @@ createAAClient(privateKey: JWK, level?: 'error' | 'debug'): AAClient
     - `baseUrl` (string): Base URL for the API.
     - `token` (string): API key or token.
     - `id` (string): Consent ID.
+    - `publicKey` (JWK): The public Key of the AA. This is required to verify the response signature
   - **Returns**: `Promise<IResponse<ConsentTypes.IConsentByIdResponse>>` - Response from the API.
   - **Description**: Retrieves consent details by ID.
 
-- **`raiseFIRequest(baseUrl: string, token: string, body: FITypes.IFIRequest, keys: FITypes.IKeys)`**
+- **`raiseFIRequest(baseUrl: string, token: string, body: FITypes.IFIRequest, keys: FITypes.IKeys, publicKey: JWK)`**
 
   ```typescript
   client.raiseFIRequest(baseUrl: string, token: string, body: FITypes.IFIRequest, keys: FITypes.IKeys): Promise<{ keys: FITypes.IKeys; response: IResponse<FITypes.IFIRequestResponse> }>
@@ -154,10 +157,11 @@ createAAClient(privateKey: JWK, level?: 'error' | 'debug'): AAClient
     - `token` (string): API key or token.
     - `body` (FITypes.IFIRequest): Request body.
     - `keys` (FITypes.IKeys): Keys for the request.
+    - `publicKey` (JWK): The public Key of the AA. This is required to verify the response signature
   - **Returns**: `Promise<{ keys: FITypes.IKeys; response: IResponse<FITypes.IFIRequestResponse> }>` - Response from the API and keys.
   - **Description**: Raises a financial information request.
 
-- **`fetchFI(baseUrl: string, token: string, body: FITypes.IFIFetchRequest)`**
+- **`fetchFI(baseUrl: string, token: string, body: FITypes.IFIFetchRequest, publicKey: JWK)`**
 
   ```typescript
   client.fetchFI(baseUrl: string, token: string, body: FITypes.IFIFetchRequest): Promise<{ response: IResponse<FITypes.IFIFetchResponse>; FIData?: Array<Record<string, any>> }>
@@ -167,6 +171,7 @@ createAAClient(privateKey: JWK, level?: 'error' | 'debug'): AAClient
     - `baseUrl` (string): Base URL for the API.
     - `token` (string): API key or token.
     - `body` (FITypes.IFIFetchRequest): Fetch request body.
+    - `publicKey` (JWK): The public Key of the AA. This is required to verify the response signature
   - **Returns**: `Promise<{ response: IResponse<FITypes.IFIFetchResponse>; FIData?: Array<Record<string, any>> }>` - Response from the API and optionally, fetched financial data.
   - **Description**: Fetches financial information.
 
