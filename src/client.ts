@@ -81,6 +81,9 @@ class AAClient {
       return {
         status: res?.status,
         data: res?.data,
+        meta: {
+          transactionId: payload.txnid,
+        },
       };
     } catch (err) {
       this._logger.error({
@@ -220,7 +223,7 @@ class AAClient {
     baseUrl: string,
     token: string,
     id: string,
-    publicKey: JWK
+    publicKey: JWK,
   ) {
     const payload = {
       ...baseMapper.execute({}),
@@ -229,12 +232,14 @@ class AAClient {
     const headers = await this._generateHeader(token, payload);
     const url = `${baseUrl}/Consent/fetch`;
 
-    return await this._postRequest<ConsentTypes.IConsentByIdResponse>(
+    const res = await this._postRequest<ConsentTypes.IConsentByIdResponse>(
       url,
       payload,
       headers,
-      publicKey
+      publicKey,
     );
+
+    return res;
   }
 
   public async raiseFIRequest(
@@ -264,7 +269,7 @@ class AAClient {
       url,
       payload,
       headers,
-      publicKey
+      publicKey,
     );
     return { response, keys };
   }
@@ -289,7 +294,7 @@ class AAClient {
       url,
       payload,
       headers,
-      publicKey
+      publicKey,
     );
 
     if (!response.data) {
