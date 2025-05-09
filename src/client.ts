@@ -131,9 +131,11 @@ class AAClient {
     payload: Record<string, any>,
   ): Promise<string> {
     const key = await importJWK(this._pvtKey, "RS256");
+    const kid = this._pvtKey.kid;
     const encodedPayload = new TextEncoder().encode(JSON.stringify(payload));
     const data = await new FlattenedSign(encodedPayload)
       .setProtectedHeader({
+        kid,
         alg: "RS256",
         b64: false,
         crit: ["b64"],

@@ -10,6 +10,7 @@ export const logger: any = {
 };
 
 export const keyPair = {
+  kid: "8a893a8b-857a-412a-b000-0123456789ab",
   p: "xfwDuWwaJFi1PgXh7_9U3eyEbNysqo1fL3wfUsCMU3-zLWob-xrwRAjDRqnc32bs8Cwzzn7iIPLS2Bru_B6SgD6zB3syF3PCUdfmGUINLOcS2pQBmOU-iLCOWIfuL0Nvcx2Ot3nQ5zD9yrabiv18-6ShcbmhbSQfAMEKlqQFopk",
   kty: "RSA",
   q: "t3zOBIqi8eQqzFrGFbtQOmfZl4uV-mAq3qLJHlFWSQFhtJfWxCopDxPHM36al5SK_RCm7WdGVI2-H8v7Ogv4GceRm1srKJcKUmc9N7oQEdN1pwFx89lqvF25rL4SW0dnvcND8PaHCz4lXUcM1c5G6nAeebjm8WOC_4G3pOuvPFE",

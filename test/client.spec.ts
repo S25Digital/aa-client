@@ -18,7 +18,7 @@ import {
   publicKey,
   setupNock,
   uuid,
-  logger
+  logger,
 } from "./data";
 import { Scope } from "nock";
 import axios from "axios";
@@ -47,7 +47,7 @@ describe("AA Client", () => {
       const signature = await aaClient.generateDetachedJWS(body);
       const parts = signature.split(".");
       expect(signature).to.equal(
-        "eyJhbGciOiJSUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..Ge_QjVKB6fMl4zv10xqlZde56LBhO2Q7RGW41rE6BlcQP-_YqWRCc3xSETQgPo8Ji8K5RJrx4jJkVCnT3MhQwvrt8enor-R_-nMiJ34hr-iXF_gVDIU8DVgYAwPFdheP8_3F_M88lh5Sx9t38xAepNJ5eMzGsrV24EPPRR3KmBicB7NcqOTgrl_G-qzVL8lHj8ad7mTA_qgSbnQW7C8gsWk1nRMje3KGrWoOFwYSdtsDxLDdpaSYgWivze3ZgSHwo_c12KTfB0TywwN4_biYig5FXOl9IHnxAuvwErmXBJOZQw-u9xZj3db81ggek4ne0B5O1fAeoUjfI9oLXXFIEQ",
+        "eyJraWQiOiI4YTg5M2E4Yi04NTdhLTQxMmEtYjAwMC0wMTIzNDU2Nzg5YWIiLCJhbGciOiJSUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..J_K7btNqZNGWnbhsMQGfbCkxwHRPBgkAnngGXD8T8KDHJ9yNx1f-6HnxiDQCbShf18e-wmrY0lLQGalyBaUTD8B9VODBCWEQXLu7s7LtMOkDoRZCn6L9CO_8H95s-tfU9UTGbz8QbmoeEXd2ayYYNoYvFhKBZXrWGgXO6NgKMBIVvdVp5g2uI01bqnme6eCb2Bt00C-95cLqxLja0Mf3JhTBDwqjOyp4PXatcKutulRUrT-lkidX2-a3bOr5wBVHlwGGscEvW1GkbeESUaEL47fSUYeKdO2TGSufEU0c2W_9SMHU21d0PeTSH9_7iiE259XMvRt9NcE2m2nsjw3U0A",
       );
       expect(parts.length).to.equal(3);
       expect(parts[1]).to.equal("");
@@ -80,7 +80,7 @@ describe("AA Client", () => {
   });
 
   describe("The raiseConsent method", () => {
-    beforeEach(async() => {
+    beforeEach(async () => {
       nockServer = await setupNock();
     });
     afterEach(() => {
@@ -104,6 +104,9 @@ describe("AA Client", () => {
             timestamp: "2023-06-26T11:39:57.153Z",
             txnid: "d5e26bff-3887-46a2-8ed2-962adeede7e4",
             ver: "2.0.0",
+          },
+          meta: {
+            transactionId: "d5e26bff-3887-46a2-8ed2-962adeede7e4",
           },
           status: 200,
         });
@@ -131,7 +134,7 @@ describe("AA Client", () => {
     });
   });
   describe("The getConsentByHandle method", () => {
-    beforeEach(async() => {
+    beforeEach(async () => {
       nockServer = await setupNock();
     });
     afterEach(() => {
@@ -139,7 +142,12 @@ describe("AA Client", () => {
     });
     describe("when it is successful", () => {
       it("should return the appropriate response", async () => {
-        const res = await aaClient.getConsentByHandle(baseUrl, "token", uuid, publicKey);
+        const res = await aaClient.getConsentByHandle(
+          baseUrl,
+          "token",
+          uuid,
+          publicKey,
+        );
 
         expect(res).to.deep.equal({
           data: {
@@ -151,6 +159,10 @@ describe("AA Client", () => {
               id: "654024c8-29c8-11e8-8868-0289437bf331",
               status: "APPROVED",
             },
+          },
+
+          meta: {
+            transactionId: "d5e26bff-3887-46a2-8ed2-962adeede7e4",
           },
           status: 200,
         });
@@ -179,7 +191,7 @@ describe("AA Client", () => {
   });
 
   describe("The getConsentById method", () => {
-    beforeEach(async() => {
+    beforeEach(async () => {
       nockServer = await setupNock();
     });
     afterEach(() => {
@@ -187,7 +199,12 @@ describe("AA Client", () => {
     });
     describe("when it is successful", () => {
       it("should return the appropriate response", async () => {
-        const res = await aaClient.getConsentById(baseUrl, "token", uuid, publicKey);
+        const res = await aaClient.getConsentById(
+          baseUrl,
+          "token",
+          uuid,
+          publicKey,
+        );
 
         expect(res).to.deep.equal({
           data: {
@@ -203,6 +220,10 @@ describe("AA Client", () => {
               count: 1,
               lastUseDateTime: dateTime,
             },
+          },
+
+          meta: {
+            transactionId: "d5e26bff-3887-46a2-8ed2-962adeede7e4",
           },
           status: 200,
         });
