@@ -4,6 +4,7 @@ import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
 import { ConsentTypes, FITypes, IResponse } from "../types";
 import { baseMapper } from "./mapper";
 import { Logger } from "pino";
+import { buildRedirectURL } from "./redirectURL";
 
 interface IOptions {
   privateKey: JWK;
@@ -317,6 +318,24 @@ class AAClient {
     const url = `${baseUrl}/Heartbeat`;
 
     return await this._getRequest<ConsentTypes.IHeartbeat>(url, headers);
+  }
+
+  public async generateRedirectUrl(
+    url: string,
+    ecReq: {
+      txnid: string;
+      sessionid: string;
+      srcref: string[];
+      userid: string;
+      redirect: string;
+      fi: string;
+    },
+    secret: string,
+  ) {
+    return buildRedirectURL(url, {
+      ...ecReq,
+      secret,
+    });
   }
 }
 

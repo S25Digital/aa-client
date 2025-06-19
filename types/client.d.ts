@@ -19,7 +19,7 @@ import { Logger } from "pino";
 interface IOptions {
   privateKey: JWK;
   httpClient: Axios;
-  logger: Logger
+  logger: Logger;
 }
 declare class AAClient {
   private _pvtKey;
@@ -72,6 +72,23 @@ declare class AAClient {
     publicKey: JWK,
   ): Promise<{
     response: IResponse<IFIFetchResponse>;
+  }>;
+  generateRedirectUrl(
+    url: string,
+    ecReq: {
+      txnid: string;
+      sessionid: string;
+      srcref: string[];
+      userid: string;
+      redirect: string;
+      fi: string;
+    },
+    secret: string,
+  ): Promise<{
+    url: string;
+    reqdate: string;
+    ecreq: string;
+    fi: string;
   }>;
 }
 export default AAClient;
