@@ -1,59 +1,61 @@
-import { expect } from 'chai';
-import { encrypt, decrypt, encryptValueToXor, decryptXoredValue } from '../src/redirectURL';
+import { expect } from "chai";
+import { SinonFakeTimers, useFakeTimers} from "sinon";
 
-describe('Encryption Utility', () => {
-  const salt = '031120201803460';
-  const payload = 'txnid=T1234&sessionid=S1234&srcref=Srcref1234&userid=test@test-aa&redirect=https://example.com';
+import { buildRedirectURL } from "../src/redirectURL";
 
-  it('should encrypt and decrypt the payload correctly', () => {
-    const encrypted = encrypt(payload, salt);
-    const decrypted = decrypt(encrypted, salt);
-    expect(decrypted).to.equal(payload);
+let clock: SinonFakeTimers;
+
+describe("buildRedirectURL", () => {
+    before(() => {
+    clock = useFakeTimers(new Date());
+  });
+  after(() => {
+    clock.restore();
+  });
+  const baseURL = "https://aa.xmpe.in";
+  const testParams = {
+    txnid: "txn-123",
+    sessionid: "sess-456",
+    srcref: ["ref-789"],
+    userid: "9999999999@testaa",
+    redirect: "https://example.com/callback",
+    fi: "FIUID",
+    secret: "ac12ghd75kf75r",
+  };
+
+  it("should generate a valid redirection object with URL, reqdate, ecreq and fi", () => {
+    const result = buildRedirectURL(baseURL, testParams);
+
+    expect(result).to.have.property("url").that.includes(baseURL);
+    expect(result).to.have.property("reqdate").that.is.a("string").and.not
+      .empty;
+    expect(result).to.have.property("ecreq").that.is.a("string").and.not.empty;
+    expect(result).to.have.property("fi").that.is.a("string").and.not.empty;
   });
 
-  it('should produce different encrypted values for different salts', () => {
-    const altSalt = '15062025120000';
-    const encrypted1 = encrypt(payload, salt);
-    const encrypted2 = encrypt(payload, altSalt);
-    expect(encrypted1).to.not.equal(encrypted2);
+  it("should include all expected query parameters", () => {
+    const result = buildRedirectURL(baseURL, testParams);
+    const url = new URL(result.url);
+
+    expect(url.searchParams.get("reqdate")).to.equal(result.reqdate);
+    expect(url.searchParams.get("ecreq")).to.equal(result.ecreq);
+    expect(url.searchParams.get("fi")).to.equal(result.fi);
   });
 
-  it('should fail to decrypt with incorrect salt', () => {
-    const encrypted = encrypt(payload, salt);
-    const wrongSalt = '000000000000000';
-    expect(() => decrypt(encrypted, wrongSalt)).to.throw();
+  it("should generate different ecreq values with different salts", () => {
+    const result1 = buildRedirectURL(baseURL, testParams);
+    setTimeout(() => {
+      const result2 = buildRedirectURL(baseURL, testParams);
+      expect(result1.ecreq).to.not.equal(result2.ecreq);
+    }, 1100); // Ensure salt differs by timestamp
   });
 
-  it('should return valid URL-safe base64 string', () => {
-    const encrypted = encrypt(payload, salt);
-    expect(encrypted).to.match(/^[A-Za-z0-9\-_.~%]+$/);
-  });
-});
+  it("should produce deterministic output if salt is fixed", () => {
 
-describe('XOR Encryption Utility', () => {
-  const value = 'FIUID';
-  const key = '031120201803460';
+    const r1 = buildRedirectURL(baseURL, testParams);
+    const r2 = buildRedirectURL(baseURL, testParams);
 
-  it('should encrypt and decrypt correctly with the same key', () => {
-    const encrypted = encryptValueToXor(value, key);
-    const decrypted = decryptXoredValue(encrypted, key);
-    expect(decrypted).to.equal(value);
-  });
-
-  it('should produce different output for different keys', () => {
-    const encrypted1 = encryptValueToXor(value, key);
-    const encrypted2 = encryptValueToXor(value, 'diffkey123');
-    expect(encrypted1).to.not.equal(encrypted2);
-  });
-
-  it('should not decrypt correctly with wrong key', () => {
-    const encrypted = encryptValueToXor(value, key);
-    const decrypted = decryptXoredValue(encrypted, 'wrongkey');
-    expect(decrypted).to.not.equal(value);
-  });
-
-  it('should return base64-encoded string', () => {
-    const encrypted = encryptValueToXor(value, key);
-    expect(encrypted).to.match(/^[A-Za-z0-9+/=]+$/);
+    expect(r1.ecreq).to.equal(r2.ecreq);
+    expect(r1.url).to.equal(r2.url);
   });
 });

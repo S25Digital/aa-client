@@ -4,6 +4,7 @@ import { FlattenedSign, JWK, flattenedVerify, importJWK } from "jose";
 import { ConsentTypes, FITypes, IResponse } from "../types";
 import { baseMapper } from "./mapper";
 import { Logger } from "pino";
+import { buildRedirectURL } from "./redirectURL";
 
 interface IOptions {
   privateKey: JWK;
@@ -319,18 +320,23 @@ class AAClient {
     return await this._getRequest<ConsentTypes.IHeartbeat>(url, headers);
   }
 
-  // public async generateRedirectUrl(ecReq: Record<string, any>, secret: string, salt: string) {
-  //   const body = ecReq;
-
-  // // 2. Encrypt with AES/CBC/PKCS5
-  // const key = crypto.pbkdf2Sync(secret, Buffer.from(salt, 'utf8'), 65536, 32, 'sha256');
-  // const cipher = crypto.createCipheriv(AES_ALGO, key, IV);
-  // const encrypted = Buffer.concat([cipher.update(Buffer.from(body, 'utf8')), cipher.final()]);
-
-  // // 3. Encode to URL-safe Base64
-  // return encodeURIComponent(encrypted.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
-
-  // }
+  public async generateRedirectUrl(
+    url: string,
+    ecReq: {
+      txnid: string;
+      sessionid: string;
+      srcref: string[];
+      userid: string;
+      redirect: string;
+      fi: string;
+    },
+    secret: string,
+  ) {
+    return buildRedirectURL(url, {
+      ...ecReq,
+      secret,
+    });
+  }
 }
 
 export default AAClient;
