@@ -24,7 +24,11 @@ function base64UrlEncode(buffer: Buffer) {
 
 function encryptAES(payload: string, salt: string, secret: string) {
   const key = getKeyFromPassword(secret, salt);
-  const cipher = crypto.createCipheriv(AES_ALGO, key as CipherKey, IV as BinaryLike);
+  const cipher = crypto.createCipheriv(
+    AES_ALGO,
+    key as CipherKey,
+    IV as BinaryLike,
+  );
   const encrypted = Buffer.concat([
     cipher.update(Buffer.from(payload, "utf8") as any) as any,
     cipher.final(),
@@ -65,33 +69,41 @@ function generateReqDateSalt() {
   ].join("");
 }
 
-export function buildRedirectURL(baseURL: string, params: {
-  txnid: string;
-  sessionid: string;
-  srcref: string[];
-  userid: string;
-  redirect: string;
-  fi: string;
-  secret: string
-}) {
+export function buildRedirectURL(
+  baseURL: string,
+  params: {
+    txnid: string;
+    sessionid: string;
+    srcref: string[];
+    userid: string;
+    redirect: string;
+    fi: string;
+    secret: string;
+  },
+) {
   const salt = generateReqDateSalt();
 
-   const fields: Record<string, any> = {
+  const fields: Record<string, any> = {
     redirect: params.redirect,
     sessionid: params.sessionid,
     srcref: params.srcref,
     txnid: params.txnid,
-    userid: params.userid
+    userid: params.userid,
   };
 
   const sorted = Object.keys(fields)
     .sort()
-    .reduce((acc, key) => {
-      acc[key] = fields[key];
-      return acc;
-    }, {} as Record<string, any>);
+    .reduce(
+      (acc, key) => {
+        acc[key] = fields[key];
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
 
-  const body = querystring.stringify(sorted);
+  const body = querystring.stringify(sorted, null, null, {
+    encodeURIComponent: (data) => data,
+  });
 
   const ecreq = encryptAES(body, salt, params.secret);
   const xorFI = encryptValueToXor(params.fi, salt);
@@ -106,5 +118,5 @@ export function buildRedirectURL(baseURL: string, params: {
     reqdate: salt,
     ecreq,
     fi: xorFI,
-  }
+  };
 }
