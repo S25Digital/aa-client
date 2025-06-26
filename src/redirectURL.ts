@@ -87,7 +87,29 @@ export function buildRedirectURL(
 ) {
   const salt = generateReqDateSalt();
 
-  const body = querystring.stringify(params, null, null, {
+  const fields: Record<string, any> = {
+    redirect: params.redirect ?? "",
+    sessionid: params.sessionid,
+    srcref: params.srcref,
+    txnid: params.txnid,
+    userid: params.userid,
+    pan: params.pan ?? "",
+    dob: params.dob ?? "",
+    fipid: params.fipid ?? [],
+    email: params.email ?? ""
+  };
+
+  const sorted = Object.keys(fields)
+    .sort()
+    .reduce(
+      (acc, key) => {
+        acc[key] = fields[key];
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+
+  const body = querystring.stringify(sorted, null, null, {
     encodeURIComponent: (data) => data,
   });
 
