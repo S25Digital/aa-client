@@ -329,6 +329,10 @@ class AAClient {
       userid: string;
       redirect: string;
       fi: string;
+      pan?: string;
+      email?: string;
+      dob?: string;
+      fipid?: string[];
     },
     secret: string,
   ) {

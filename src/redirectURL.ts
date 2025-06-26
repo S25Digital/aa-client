@@ -79,29 +79,15 @@ export function buildRedirectURL(
     redirect: string;
     fi: string;
     secret: string;
+    pan?: string;
+    dob?: string;
+    email?: string;
+    fipid?: string[];
   },
 ) {
   const salt = generateReqDateSalt();
 
-  const fields: Record<string, any> = {
-    redirect: params.redirect,
-    sessionid: params.sessionid,
-    srcref: params.srcref,
-    txnid: params.txnid,
-    userid: params.userid,
-  };
-
-  const sorted = Object.keys(fields)
-    .sort()
-    .reduce(
-      (acc, key) => {
-        acc[key] = fields[key];
-        return acc;
-      },
-      {} as Record<string, any>,
-    );
-
-  const body = querystring.stringify(sorted, null, null, {
+  const body = querystring.stringify(params, null, null, {
     encodeURIComponent: (data) => data,
   });
 
