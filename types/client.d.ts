@@ -94,5 +94,6 @@ declare class AAClient {
     ecreq: string;
     fi: string;
   }>;
+  getHeartBeat(baseUrl: string): Promise<IResponse<ConsentTypes.IHeartbeat>>;
 }
 export default AAClient;
