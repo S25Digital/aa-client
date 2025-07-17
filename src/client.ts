@@ -311,9 +311,10 @@ class AAClient {
     };
   }
 
-  public async getHeartBeat(baseUrl: string) {
+  public async getHeartBeat(baseUrl: string, token: string) {
     const headers = {
       "Content-Type": "application/json",
+      client_api_key: token,
     };
     const url = `${baseUrl}/Heartbeat`;
 
