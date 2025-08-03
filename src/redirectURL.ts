@@ -10,7 +10,7 @@ function getKeyFromPassword(password: string, salt: string) {
     Buffer.from(salt, "utf8") as BinaryLike,
     65536,
     32,
-    "sha256",
+    "sha256"
   );
 }
 
@@ -22,18 +22,42 @@ function base64UrlEncode(buffer: Buffer) {
     .replace(/=+$/, "");
 }
 
+function base64UrlDecode(str: string) {
+  // Revert URL encoding
+  str = str.replace(/-/g, "+").replace(/_/g, "/");
+  // Pad with '=' to make length a multiple of 4
+  while (str.length % 4) str += "=";
+  return Buffer.from(str, "base64");
+}
+
 function encryptAES(payload: string, salt: string, secret: string) {
   const key = getKeyFromPassword(secret, salt);
   const cipher = crypto.createCipheriv(
     AES_ALGO,
     key as CipherKey,
-    IV as BinaryLike,
+    IV as BinaryLike
   );
   const encrypted = Buffer.concat([
-    cipher.update(Buffer.from(payload, "utf8") as any) as any,
-    cipher.final(),
+    cipher.update(Buffer.from(payload, "utf8") as any)as any,
+    cipher.final()
   ]);
   return base64UrlEncode(encrypted);
+}
+
+// If you need to decrypt, use this
+function decryptAES(cipherText: string, salt: string, secret: string) {
+  const key = getKeyFromPassword(secret, salt);
+  const decipher = crypto.createDecipheriv(
+    AES_ALGO,
+    key as CipherKey,
+    IV as BinaryLike
+  );
+  const encryptedBuffer = base64UrlDecode(cipherText);
+  const decrypted = Buffer.concat([
+    decipher.update(encryptedBuffer as any) as any,
+    decipher.final() as any
+  ]);
+  return decrypted.toString("utf8");
 }
 
 function xor(a: Buffer, key: Buffer) {
@@ -45,14 +69,16 @@ function xor(a: Buffer, key: Buffer) {
 }
 
 function encryptValueToXor(value: string, key: string) {
-  return Buffer.from(xor(Buffer.from(value), Buffer.from(key)) as any).toString(
-    "base64",
-  );
+  // Explicitly use UTF-8 encoding!
+  const valueBuf = Buffer.from(value, "utf8");
+  const keyBuf = Buffer.from(key, "utf8");
+  return xor(valueBuf, keyBuf).toString("base64");
 }
 
 function decryptXoredValue(xoredValue: string, key: string) {
   const decoded = Buffer.from(xoredValue, "base64");
-  return xor(decoded, Buffer.from(key)).toString("utf8");
+  const keyBuf = Buffer.from(key, "utf8");
+  return xor(decoded, keyBuf).toString("utf8");
 }
 
 function generateReqDateSalt() {
@@ -65,7 +91,7 @@ function generateReqDateSalt() {
     pad(now.getUTCHours()),
     pad(now.getUTCMinutes()),
     pad(now.getUTCSeconds()),
-    Math.floor(now.getUTCMilliseconds() / 100).toString(),
+    Math.floor(now.getUTCMilliseconds() / 100).toString()
   ].join("");
 }
 
@@ -83,7 +109,7 @@ export function buildRedirectURL(
     dob?: string;
     email?: string;
     fipid?: string[];
-  },
+  }
 ) {
   const salt = generateReqDateSalt();
 
@@ -101,16 +127,13 @@ export function buildRedirectURL(
 
   const sorted = Object.keys(fields)
     .sort()
-    .reduce(
-      (acc, key) => {
-        acc[key] = fields[key];
-        return acc;
-      },
-      {} as Record<string, any>,
-    );
+    .reduce((acc, key) => {
+      acc[key] = fields[key];
+      return acc;
+    }, {} as Record<string, any>);
 
   const body = querystring.stringify(sorted, null, null, {
-    encodeURIComponent: (data) => data,
+    encodeURIComponent: (data) => data
   });
 
   const ecreq = encryptAES(body, salt, params.secret);
@@ -121,10 +144,13 @@ export function buildRedirectURL(
   url.searchParams.set("ecreq", ecreq);
   url.searchParams.set("fi", xorFI);
 
+  // Uncomment for debugging
+  // console.log({ salt, body, ecreq, xorFI, url: url.toString() });
+
   return {
     url: url.toString(),
     reqdate: salt,
     ecreq,
-    fi: xorFI,
+    fi: xorFI
   };
 }
