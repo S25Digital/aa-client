@@ -15,11 +15,17 @@ function getKeyFromPassword(password: string, salt: string) {
 }
 
 function base64UrlEncode(buffer: Buffer) {
-  return buffer
+  let str = buffer
     .toString("base64")
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/, "");
+
+    while (str.length % 4) {
+      str += "=";
+    }
+
+    return str;
 }
 
 function base64UrlDecode(str: string) {
