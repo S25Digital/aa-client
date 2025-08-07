@@ -10,7 +10,7 @@ function getKeyFromPassword(password: string, salt: string) {
     Buffer.from(salt, "utf8") as BinaryLike,
     65536,
     32,
-    "sha256"
+    "sha256",
   );
 }
 
@@ -21,11 +21,11 @@ function base64UrlEncode(buffer: Buffer) {
     .replace(/\//g, "_")
     .replace(/=+$/, "");
 
-    while (str.length % 4) {
-      str += "=";
-    }
+  while (str.length % 4) {
+    str += "=";
+  }
 
-    return str;
+  return str;
 }
 
 function base64UrlDecode(str: string) {
@@ -41,11 +41,11 @@ function encryptAES(payload: string, salt: string, secret: string) {
   const cipher = crypto.createCipheriv(
     AES_ALGO,
     key as CipherKey,
-    IV as BinaryLike
+    IV as BinaryLike,
   );
   const encrypted = Buffer.concat([
-    cipher.update(Buffer.from(payload, "utf8") as any)as any,
-    cipher.final()
+    cipher.update(Buffer.from(payload, "utf8") as any) as any,
+    cipher.final(),
   ]);
   return base64UrlEncode(encrypted);
 }
@@ -56,12 +56,12 @@ function decryptAES(cipherText: string, salt: string, secret: string) {
   const decipher = crypto.createDecipheriv(
     AES_ALGO,
     key as CipherKey,
-    IV as BinaryLike
+    IV as BinaryLike,
   );
   const encryptedBuffer = base64UrlDecode(cipherText);
   const decrypted = Buffer.concat([
     decipher.update(encryptedBuffer as any) as any,
-    decipher.final() as any
+    decipher.final() as any,
   ]);
   return decrypted.toString("utf8");
 }
@@ -97,7 +97,7 @@ function generateReqDateSalt() {
     pad(now.getUTCHours()),
     pad(now.getUTCMinutes()),
     pad(now.getUTCSeconds()),
-    Math.floor(now.getUTCMilliseconds() / 100).toString()
+    Math.floor(now.getUTCMilliseconds() / 100).toString(),
   ].join("");
 }
 
@@ -115,7 +115,7 @@ export function buildRedirectURL(
     dob?: string;
     email?: string;
     fipid?: string[];
-  }
+  },
 ) {
   const salt = generateReqDateSalt();
 
@@ -127,16 +127,22 @@ export function buildRedirectURL(
     userid: params.userid,
     pan: params.pan ?? null,
     dob: params.dob ?? null,
-    fipid: params.fipid ?? [],
-    email: params.email ?? null
+    fipid: params.fipid ?? null,
+    email: params.email ?? null,
   };
 
   const sorted = Object.keys(fields)
     .sort()
-    .reduce((acc, key) => {
-      acc[key] = fields[key];
-      return acc;
-    }, {} as Record<string, any>);
+    .reduce(
+      (acc, key) => {
+        const value = fields[key];
+        if (value !== null && value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
 
   const body = querystring.stringify(sorted, null, null, {
     encodeURIComponent: (data) => data
@@ -157,6 +163,6 @@ export function buildRedirectURL(
     url: url.toString(),
     reqdate: salt,
     ecreq,
-    fi: xorFI
+    fi: xorFI,
   };
 }
