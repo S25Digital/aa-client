@@ -125,10 +125,10 @@ export function buildRedirectURL(
     srcref: params.srcref,
     txnid: params.txnid,
     userid: params.userid,
-    pan: params.pan ?? "",
-    dob: params.dob ?? "",
+    pan: params.pan ?? null,
+    dob: params.dob ?? null,
     fipid: params.fipid ?? [],
-    email: params.email ?? ""
+    email: params.email ?? null
   };
 
   const sorted = Object.keys(fields)
