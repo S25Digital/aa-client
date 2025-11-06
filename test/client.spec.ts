@@ -37,10 +37,10 @@ let nockServer: Scope;
 
 describe("AA Client", () => {
   before(() => {
-    clock = useFakeTimers(new Date(dateTime));
+    // clock = useFakeTimers(new Date(dateTime));
   });
   after(() => {
-    clock.restore();
+    // clock.restore();
   });
   describe("The generateDetachedJWS method", () => {
     it("should return a detached signature", async () => {
