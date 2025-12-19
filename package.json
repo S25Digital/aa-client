@@ -14,7 +14,7 @@
     "prebuild": "rimraf dist",
     "build": "node build.js",
     "prepublishOnly": "npm run build",
-    "test": "TZ=utc DOTENV_CONFIG_PATH=.env.spec mocha -r esbuild-register -r dotenv/config 'test/**/*.spec.ts'",
+    "test": "cross-env TZ=utc DOTENV_CONFIG_PATH=.env.spec mocha -r esbuild-register -r dotenv/config 'test/**/*.spec.ts'",
     "test:coverage": "nyc npm run test"
   },
   "keywords": [],
@@ -40,6 +40,7 @@
     "@types/uuid": "^11.0.0",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
     "chai": "^6.2.0",
+    "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
     "esbuild": "^0.25.12",
     "esbuild-register": "^3.6.0",
