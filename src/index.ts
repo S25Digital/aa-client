@@ -1,6 +1,6 @@
 import { JWK } from "jose";
 import AAClient from "./client";
-import axios from "axios";
+import axios, {Axios} from "axios";
 import pino from "pino";
 import axiosRetry from "axios-retry";
 
@@ -12,9 +12,9 @@ enum Levels {
   silent = "silent",
 }
 
-const httpClient = axios.create();
+const client = axios.create();
 
-axiosRetry(httpClient, {
+axiosRetry(client, {
   retries: 3,
   retryDelay: axiosRetry.exponentialDelay,
   shouldResetTimeout: true,
@@ -30,6 +30,7 @@ axiosRetry(httpClient, {
 export function createAAClient(
   privateKey: JWK,
   level: keyof typeof Levels = "silent",
+  httpClient: Axios = client
 ) {
   const logger = pino({
     level: level,
@@ -37,7 +38,7 @@ export function createAAClient(
 
   return new AAClient({
     privateKey,
-    httpClient: httpClient,
+    httpClient,
     logger,
   });
 }
