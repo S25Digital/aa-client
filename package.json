@@ -24,7 +24,7 @@
     "axios": "^1.13.2",
     "axios-retry": "^4.5.0",
     "fast-xml-parser": "^5.3.1",
-    "jose": "^6.1.0",
+    "jose": "^5.2.0",
     "map-factory": "^3.8.7",
     "pino": "^10.1.0",
     "uuid": "^13.0.0"
