@@ -2,6 +2,9 @@
 
 `aa-client` is a TypeScript library designed for interacting with the AA (Account Aggregator) ecosystem. It provides functionality for managing consents, handling financial information requests, and verifying signatures using JSON Web Tokens (JWTs) with RS256 algorithms.
 
+## What is the difference between v1 and v2?
+In version `v2`, the underlying `jose` package has been updated to the latest version. The latest version of the package implements a much stricter check while verifying the `x-jws-signature`. Apart from this, there is no breaking change in the current implementation of the package. You can use both the version, owever the jose package in `v1` will be frozen to previous version to avoid any breaking change for you until you are ready to migrate to `v2`.
+
 ## Features
 
 - **Consent Management**: Raise and retrieve consents by handle or ID.
